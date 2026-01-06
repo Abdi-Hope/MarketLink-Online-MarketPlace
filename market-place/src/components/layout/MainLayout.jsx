@@ -1,21 +1,23 @@
-﻿import { Outlet } from 'react-router-dom';
+﻿// src/components/layout/MainLayout.jsx
+import React from 'react';
+import Header from '../common/Header';
+import Navbar from '../common/Navbar';
+import Footer from '../common/Footer';
 
-const MainLayout = () => {
+const MainLayout = ({ children }) => {
   return (
-    <div>
-      <header style={{ background: '#333', color: 'white', padding: '1rem' }}>
-        <nav>
-          <a href="/" style={{ color: 'white', marginRight: '1rem' }}>Home</a>
-          <a href="/products" style={{ color: 'white', marginRight: '1rem' }}>Products</a>
-          <a href="/cart" style={{ color: 'white' }}>Cart</a>
-        </nav>
-      </header>
-      <main style={{ padding: '2rem' }}>
-        <Outlet />
+    <div className="min-h-screen flex flex-col">
+      {/* Header and Navbar at top */}
+      <Header />
+      <Navbar />
+      
+      {/* Main content area */}
+      <main className="flex-1">
+        {children}
       </main>
-      <footer style={{ background: '#333', color: 'white', padding: '1rem', textAlign: 'center' }}>
-        <p>&copy; 2024 MarketPlace</p>
-      </footer>
+      
+      {/* Footer at bottom */}
+      <Footer />
     </div>
   );
 };

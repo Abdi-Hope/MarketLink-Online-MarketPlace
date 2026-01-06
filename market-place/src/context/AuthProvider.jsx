@@ -1,5 +1,4 @@
-﻿/* eslint-disable @sonarlint/javascript:S6774 */
-import { useState, useEffect, useMemo, useCallback } from 'react';
+﻿import { useState, useEffect, useMemo, useCallback } from 'react';
 import AuthContext from './AuthContext';
 
 // Provider component ONLY - no hook here

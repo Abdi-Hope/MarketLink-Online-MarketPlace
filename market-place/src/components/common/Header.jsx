@@ -1,80 +1,70 @@
-import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthProvider';
-import { useCart } from '../../context/CartContext';
-import { FaShoppingCart, FaUser, FaSearch } from 'react-icons/fa';
-import './Header.css';
+// src/components/common/Header.jsx
+import React from 'react';
+import { Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
-  const { user, isAuthenticated, logout } = useAuth();
-  const { cartItems } = useCart();
+  const navigate = useNavigate();
 
-  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+  const handleSearch = (e) => {
+    if (e.key === 'Enter') {
+      const query = e.target.value.trim();
+      if (query) {
+        navigate(`/search?q=${encodeURIComponent(query)}`);
+      }
+    }
+  };
 
   return (
-    <header className="header">
-      <div className="container">
-        {/* Logo */}
-        <div className="logo">
-          <Link to="/">
-            <h1>MarketLink</h1>
-          </Link>
-          <span className="tagline">Online Marketplace</span>
-        </div>
-
-        {/* Search Bar */}
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Search products..."
-            className="search-input"
-          />
-          <button className="search-button">
-            <FaSearch />
+    <header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+      <div className="container mx-auto px-4 py-3">
+        <div className="flex justify-between items-center">
+          {/* Logo */}
+          <button 
+            onClick={() => navigate('/')}
+            className="flex items-center space-x-2 hover:opacity-90"
+          >
+            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+              <span className="text-blue-600 font-bold text-xl">MP</span>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold">MarketPlace</h1>
+              <p className="text-sm text-blue-100">Your Trusted Marketplace</p>
+            </div>
           </button>
-        </div>
 
-        {/* Navigation */}
-        <nav className="nav">
-          <Link to="/products" className="nav-link">Products</Link>
-          <Link to="/categories" className="nav-link">Categories</Link>
-          <Link to="/seller" className="nav-link">Sell</Link>
-        </nav>
-
-        {/* User Actions */}
-        <div className="user-actions">
-          <Link to="/cart" className="cart-icon">
-            <FaShoppingCart />
-            {cartCount > 0 && (
-              <span className="cart-count">{cartCount}</span>
-            )}
-          </Link>
-
-          {isAuthenticated ? (
-            <div className="user-menu">
-              <Link to="/dashboard" className="user-link">
-                <FaUser />
-                <span>{user?.name}</span>
-              </Link>
-              <div className="dropdown">
-                <Link to="/profile">Profile</Link>
-                <Link to="/orders">Orders</Link>
-                {user?.role === 'seller' && (
-                  <Link to="/seller">Seller Dashboard</Link>
-                )}
-                {user?.role === 'admin' && (
-                  <Link to="/admin">Admin Panel</Link>
-                )}
-                <button onClick={logout} className="logout-btn">
-                  Logout
-                </button>
-              </div>
+          {/* Search Bar */}
+          <div className="w-full md:w-auto md:max-w-md">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search products, categories..."
+                className="w-full pl-10 pr-4 py-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/50"
+                onKeyDown={handleSearch}
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70" size={20} />
             </div>
-          ) : (
-            <div className="auth-buttons">
-              <Link to="/login" className="btn btn-outline">Login</Link>
-              <Link to="/register" className="btn btn-primary">Sign Up</Link>
-            </div>
-          )}
+          </div>
+
+          {/* User Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            <button 
+              onClick={() => navigate('/help')}
+              className="inline-flex items-center space-x-1 text-sm hover:text-blue-200"
+            >
+              <span>📞</span>
+              <span>Support</span>
+            </button>
+            
+            <div className="w-px h-6 bg-white/30"></div>
+            
+            <button 
+              onClick={() => navigate('/seller/register')}
+              className="text-sm font-medium px-4 py-2 bg-white/20 rounded-lg hover:bg-white/30"
+            >
+              Become a Seller
+            </button>
+          </div>
         </div>
       </div>
     </header>

@@ -9,4 +9,4 @@ const useCart = () => {
   return context;
 };
 
-export default useCart;
+export default useCart; // Default export

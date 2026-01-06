@@ -17,11 +17,15 @@ export default {
         secondary: {
           500: '#10b981',
           600: '#059669',
-        }
+        },
+        'custom-blue': '#1a365d', // Moved inside the existing colors object
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
+      spacing: {
+        '128': '32rem', // Moved inside the existing extend object
+      }
     },
   },
   plugins: [],
