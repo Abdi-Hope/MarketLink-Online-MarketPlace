@@ -1,4 +1,4 @@
-﻿// src/routes/AppRoutes.jsx
+// src/routes/AppRoutes.jsx
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth.jsx';
 
@@ -36,11 +36,11 @@ import TermsPage from '../pages/TermsPage';
 import SellerRegisterPage from '../pages/SellerRegisterPage';
 import CheckoutPage from '../pages/CheckoutPage';
 
-// Import Seller COMPONENTS (not pages)
-import SellerProducts from '../components/seller/SellerProducts';
-import SellerOrders from '../components/seller/SellerOrders';
-import SellerAnalytics from '../components/seller/SellerAnalytics';
-import SellerProfile from '../components/seller/SellerProfile';
+// Import Seller pages (you need to create these)
+import SellerProductsPage from '../pages/seller/SellerProductsPage';
+import SellerOrdersPage from '../pages/seller/SellerOrdersPage';
+import SellerAnalyticsPage from '../pages/seller/SellerAnalyticsPage';
+import SellerProfilePage from '../pages/seller/SellerProfilePage';
 
 // Create simple placeholder pages for any missing routes
 const ShippingInfoPage = () => (
@@ -197,10 +197,10 @@ const AppRoutes = () => {
             <Routes>
               <Route path="/" element={<SellerDashboardPage />} />
               <Route path="/dashboard" element={<SellerDashboardPage />} />
-              <Route path="/products" element={<SellerProducts />} />
-              <Route path="/orders" element={<SellerOrders />} />
-              <Route path="/analytics" element={<SellerAnalytics />} />
-              <Route path="/profile" element={<SellerProfile />} />
+              <Route path="/products" element={<SellerProductsPage />} />
+              <Route path="/orders" element={<SellerOrdersPage />} />
+              <Route path="/analytics" element={<SellerAnalyticsPage />} />
+              <Route path="/profile" element={<SellerProfilePage />} />
               <Route path="*" element={<Navigate to="/seller" replace />} />
             </Routes>
           </SellerLayout>
