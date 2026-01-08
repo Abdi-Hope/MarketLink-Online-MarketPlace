@@ -11,7 +11,206 @@ import {
   Download
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
+// ProductRow component moved outside the parent component
+const ProductRow = ({ product, index, isSelected, onClick, topProductSales }) => {
+  const navigate = useNavigate();
+
+  const getGrowthColor = (growth) => {
+    if (growth > 20) return 'text-green-600 bg-green-50';
+    if (growth > 10) return 'text-blue-600 bg-blue-50';
+    if (growth > 0) return 'text-yellow-600 bg-yellow-50';
+    return 'text-red-600 bg-red-50';
+  };
+
+  const getRankColor = (rank) => {
+    switch (rank) {
+      case 1: return 'from-yellow-400 to-orange-400';
+      case 2: return 'from-gray-400 to-gray-600';
+      case 3: return 'from-amber-600 to-amber-800';
+      default: return 'from-blue-100 to-blue-200';
+    }
+  };
+
+  const handleProductClick = (productId) => {
+    navigate(`/product/${productId}`);
+  };
+
+  const handleViewAnalytics = (productId) => {
+    navigate(`/analytics/products/${productId}`);
+  };
+
+  const handleProductNameClick = (e, productId) => {
+    e.stopPropagation();
+    handleProductClick(productId);
+  };
+
+  // Calculate progress percentage safely
+  const progressPercentage = topProductSales > 0 
+    ? Math.round((product.sales / topProductSales) * 100)
+    : 0;
+
+  return (
+    <div 
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick(product.id);
+        }
+      }}
+      className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
+        isSelected ? 'bg-blue-50' : ''
+      }`}
+      onClick={() => onClick(product.id)}
+    >
+      <div className="flex items-center">
+        {/* Rank Badge */}
+        <div className={`w-10 h-10 bg-gradient-to-r ${getRankColor(index + 1)} rounded-lg flex items-center justify-center mr-4`}>
+          <span className="text-white font-bold text-lg">#{index + 1}</span>
+        </div>
+
+        {/* Product Image */}
+        <div className="w-16 h-16 rounded-lg overflow-hidden mr-4 flex-shrink-0">
+          <img 
+            src={product.image} 
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Product Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
+            <div>
+              <button
+                onClick={(e) => handleProductNameClick(e, product.id)}
+                className="text-lg font-semibold text-gray-800 hover:text-blue-600 truncate text-left bg-transparent border-none p-0 cursor-pointer"
+              >
+                {product.name}
+              </button>
+              <div className="flex items-center space-x-3 mt-1">
+                <span className="text-sm text-gray-500">{product.category}</span>
+                <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
+                  ${product.price.toFixed(2)}
+                </span>
+                <span className={`text-xs px-2 py-1 rounded font-medium ${getGrowthColor(product.growth)}`}>
+                  <ArrowUp size={10} className="inline mr-1" />
+                  {product.growth}%
+                </span>
+              </div>
+            </div>
+
+            {/* Stats */}
+            <div className="flex space-x-4">
+              <div className="text-center">
+                <div className="flex items-center text-gray-600">
+                  <ShoppingBag size={14} className="mr-1" />
+                  <span className="text-sm">Sales</span>
+                </div>
+                <div className="font-bold text-gray-800">{product.sales}</div>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center text-gray-600">
+                  <DollarSign size={14} className="mr-1" />
+                  <span className="text-sm">Revenue</span>
+                </div>
+                <div className="font-bold text-gray-800">${product.revenue.toLocaleString()}</div>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center text-gray-600">
+                  <Star size={14} className="mr-1" />
+                  <span className="text-sm">Rating</span>
+                </div>
+                <div className="font-bold text-gray-800">{product.rating}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Progress Bar & Additional Info */}
+          <div className="mt-3">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-xs text-gray-500">Sales progress</span>
+              <span className="text-xs font-medium">
+                {progressPercentage}%
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-1.5">
+              <div 
+                className="bg-gradient-to-r from-blue-500 to-purple-500 h-1.5 rounded-full"
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
+            </div>
+            
+            <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+              <span>Stock: {product.stock} units</span>
+              <span>{product.reviews} reviews</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="ml-4 flex space-x-2">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleProductClick(product.id);
+            }}
+            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+            title="View Product"
+            aria-label={`View ${product.name}`}
+          >
+            <Eye size={18} />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleViewAnalytics(product.id);
+            }}
+            className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+            title="View Analytics"
+            aria-label={`View analytics for ${product.name}`}
+          >
+            <TrendingUp size={18} />
+          </button>
+          <button
+            onClick={(e) => e.stopPropagation()}
+            className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+            title="More Options"
+            aria-label={`More options for ${product.name}`}
+          >
+            <MoreVertical size={18} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Prop validation for ProductRow
+ProductRow.propTypes = {
+  product: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    category: PropTypes.string.isRequired,
+    sales: PropTypes.number.isRequired,
+    revenue: PropTypes.number.isRequired,
+    rating: PropTypes.number.isRequired,
+    reviews: PropTypes.number.isRequired,
+    stock: PropTypes.number.isRequired,
+    image: PropTypes.string.isRequired,
+    growth: PropTypes.number.isRequired,
+    price: PropTypes.number.isRequired
+  }).isRequired,
+  index: PropTypes.number.isRequired,
+  isSelected: PropTypes.bool.isRequired,
+  onClick: PropTypes.func.isRequired,
+  topProductSales: PropTypes.number.isRequired
+};
+
+// Main TopProducts component
 const TopProducts = () => {
   const navigate = useNavigate();
   const [sortBy, setSortBy] = useState('sales');
@@ -138,29 +337,17 @@ const TopProducts = () => {
   };
 
   const sortedProducts = sortProducts(products, sortBy).slice(0, 5);
+  const topProductSales = sortedProducts.length > 0 ? sortedProducts[0].sales : 0;
 
-  const getGrowthColor = (growth) => {
-    if (growth > 20) return 'text-green-600 bg-green-50';
-    if (growth > 10) return 'text-blue-600 bg-blue-50';
-    if (growth > 0) return 'text-yellow-600 bg-yellow-50';
-    return 'text-red-600 bg-red-50';
-  };
-
-  const getRankColor = (rank) => {
-    switch (rank) {
-      case 1: return 'from-yellow-400 to-orange-400';
-      case 2: return 'from-gray-400 to-gray-600';
-      case 3: return 'from-amber-600 to-amber-800';
-      default: return 'from-blue-100 to-blue-200';
+  // Fix: Extract nested ternary into independent statements
+  const getTimeRangeLabel = (range) => {
+    switch (range) {
+      case 'week': return 'Last 7 days';
+      case 'month': return 'Last 30 days';
+      case 'quarter': return 'Last 90 days';
+      case 'year': return 'Last 365 days';
+      default: return 'Last 30 days';
     }
-  };
-
-  const handleProductClick = (productId) => {
-    navigate(`/product/${productId}`);
-  };
-
-  const handleViewAnalytics = (productId) => {
-    navigate(`/analytics/products/${productId}`);
   };
 
   return (
@@ -225,133 +412,14 @@ const TopProducts = () => {
       {/* Products List */}
       <div className="divide-y divide-gray-100">
         {sortedProducts.map((product, index) => (
-          <div 
+          <ProductRow 
             key={product.id}
-            className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${
-              selectedProduct === product.id ? 'bg-blue-50' : ''
-            }`}
-            onClick={() => setSelectedProduct(product.id)}
-          >
-            <div className="flex items-center">
-              {/* Rank Badge */}
-              <div className={`w-10 h-10 bg-gradient-to-r ${getRankColor(index + 1)} rounded-lg flex items-center justify-center mr-4`}>
-                <span className="text-white font-bold text-lg">#{index + 1}</span>
-              </div>
-
-              {/* Product Image */}
-              <div className="w-16 h-16 rounded-lg overflow-hidden mr-4 flex-shrink-0">
-                <img 
-                  src={product.image} 
-                  alt={product.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-
-              {/* Product Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                  <div>
-                    <h3 
-                      className="text-lg font-semibold text-gray-800 hover:text-blue-600 truncate"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleProductClick(product.id);
-                      }}
-                    >
-                      {product.name}
-                    </h3>
-                    <div className="flex items-center space-x-3 mt-1">
-                      <span className="text-sm text-gray-500">{product.category}</span>
-                      <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
-                        ${product.price.toFixed(2)}
-                      </span>
-                      <span className={`text-xs px-2 py-1 rounded font-medium ${getGrowthColor(product.growth)}`}>
-                        <ArrowUp size={10} className="inline mr-1" />
-                        {product.growth}%
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="flex space-x-4">
-                    <div className="text-center">
-                      <div className="flex items-center text-gray-600">
-                        <ShoppingBag size={14} className="mr-1" />
-                        <span className="text-sm">Sales</span>
-                      </div>
-                      <div className="font-bold text-gray-800">{product.sales}</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center text-gray-600">
-                        <DollarSign size={14} className="mr-1" />
-                        <span className="text-sm">Revenue</span>
-                      </div>
-                      <div className="font-bold text-gray-800">${product.revenue.toLocaleString()}</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center text-gray-600">
-                        <Star size={14} className="mr-1" />
-                        <span className="text-sm">Rating</span>
-                      </div>
-                      <div className="font-bold text-gray-800">{product.rating}</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Progress Bar & Additional Info */}
-                <div className="mt-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-gray-500">Sales progress</span>
-                    <span className="text-xs font-medium">
-                      {Math.round((product.sales / sortedProducts[0].sales) * 100)}%
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-1.5">
-                    <div 
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 h-1.5 rounded-full"
-                      style={{ width: `${(product.sales / sortedProducts[0].sales) * 100}%` }}
-                    ></div>
-                  </div>
-                  
-                  <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-                    <span>Stock: {product.stock} units</span>
-                    <span>{product.reviews} reviews</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="ml-4 flex space-x-2">
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleProductClick(product.id);
-                  }}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                  title="View Product"
-                >
-                  <Eye size={18} />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleViewAnalytics(product.id);
-                  }}
-                  className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
-                  title="View Analytics"
-                >
-                  <TrendingUp size={18} />
-                </button>
-                <button
-                  onClick={(e) => e.stopPropagation()}
-                  className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-                  title="More Options"
-                >
-                  <MoreVertical size={18} />
-                </button>
-              </div>
-            </div>
-          </div>
+            product={product}
+            index={index}
+            isSelected={selectedProduct === product.id}
+            onClick={setSelectedProduct}
+            topProductSales={topProductSales}
+          />
         ))}
       </div>
 
@@ -361,9 +429,7 @@ const TopProducts = () => {
           <div className="text-sm text-gray-600 mb-4 sm:mb-0">
             Showing top 5 products by {sortBy.replace('Sort by ', '')}
             <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-600 text-xs rounded">
-              {timeRange === 'week' ? 'Last 7 days' : 
-               timeRange === 'month' ? 'Last 30 days' : 
-               timeRange === 'quarter' ? 'Last 90 days' : 'Last 365 days'}
+              {getTimeRangeLabel(timeRange)}
             </span>
           </div>
           

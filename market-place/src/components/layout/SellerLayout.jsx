@@ -1,6 +1,7 @@
 // src/components/layout/SellerLayout.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 const SellerLayout = ({ children }) => {
   return (
@@ -61,6 +62,10 @@ const SellerLayout = ({ children }) => {
       </main>
     </div>
   );
+};
+
+SellerLayout.propTypes = {
+  children: PropTypes.node.isRequired
 };
 
 export default SellerLayout;

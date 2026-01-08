@@ -1,22 +1,46 @@
-﻿// src/pages/DashboardPage.jsx
-import React from 'react';
+﻿import React, { useState } from 'react';
 import { useAuth } from '../context/useAuth';
-import { LogOut, User, Settings, ShoppingBag, Package, Users, BarChart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-// Import dashboard components from correct path
+// Import components
+import DashboardHeader from '../components/dashboard/DashboardHeader';
+import UserPanel from '../components/dashboard/UserPanel';
+import WelcomeBanner from '../components/dashboard/WelcomeBanner';
+import StatsGrid from '../components/dashboard/StatsGrid';
 import DashboardStats from '../components/dashboard/DashboardStats';
 import RecentOrders from '../components/dashboard/RecentOrders';
 import SalesChart from '../components/dashboard/SalesChart';
 import TopProducts from '../components/dashboard/TopProducts';
 
+// Icons for cards
+import { 
+  User, Settings, ShoppingBag, Heart, Package, 
+  Users, BarChart, Activity
+} from 'lucide-react';
+
 const DashboardPage = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('overview');
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  const handleSearch = (query) => {
+    console.log('Searching for:', query);
+    // Implement search functionality
+  };
+
+  const handleExport = () => {
+    console.log('Exporting data...');
+    // Implement export functionality
+  };
+
+  const handleFilter = () => {
+    console.log('Opening filters...');
+    // Implement filter functionality
   };
 
   // Dashboard cards based on user role
@@ -27,16 +51,26 @@ const DashboardPage = () => {
         icon: User, 
         title: 'Profile', 
         description: 'View and edit your profile', 
-        bgColor: 'bg-blue-100', 
-        textColor: 'text-blue-600' 
+        bgColor: 'bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50 border border-blue-200/50',
+        textColor: 'text-blue-600',
+        iconBgColor: 'bg-blue-100/80',
+        value: user?.name ? 'Active' : 'Setup',
+        change: 0,
+        progress: user?.avatar ? 100 : 60,
+        trend: 'stable'
       },
       { 
         id: 'settings',
         icon: Settings, 
         title: 'Settings', 
         description: 'Account settings', 
-        bgColor: 'bg-gray-100', 
-        textColor: 'text-gray-600' 
+        bgColor: 'bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 border border-gray-200/50',
+        textColor: 'text-gray-600',
+        iconBgColor: 'bg-gray-100/80',
+        value: 'Updated',
+        change: 0,
+        progress: 75,
+        trend: 'stable'
       },
     ];
 
@@ -48,16 +82,26 @@ const DashboardPage = () => {
           icon: ShoppingBag, 
           title: 'My Orders', 
           description: 'Track your orders', 
-          bgColor: 'bg-green-100', 
-          textColor: 'text-green-600' 
+          bgColor: 'bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-50 border border-emerald-200/50',
+          textColor: 'text-emerald-600',
+          iconBgColor: 'bg-emerald-100/80',
+          value: '12',
+          change: 8,
+          progress: 65,
+          trend: 'up'
         },
         { 
           id: 'wishlist',
-          icon: Package, 
+          icon: Heart, 
           title: 'Wishlist', 
           description: 'View saved items', 
-          bgColor: 'bg-purple-100', 
-          textColor: 'text-purple-600' 
+          bgColor: 'bg-gradient-to-br from-rose-50 via-rose-100 to-rose-50 border border-rose-200/50',
+          textColor: 'text-rose-600',
+          iconBgColor: 'bg-rose-100/80',
+          value: '24',
+          change: 12,
+          progress: 80,
+          trend: 'up'
         },
       ];
     }
@@ -70,16 +114,26 @@ const DashboardPage = () => {
           icon: Package, 
           title: 'Products', 
           description: 'Manage your products', 
-          bgColor: 'bg-green-100', 
-          textColor: 'text-green-600' 
+          bgColor: 'bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-50 border border-emerald-200/50',
+          textColor: 'text-emerald-600',
+          iconBgColor: 'bg-emerald-100/80',
+          value: '42',
+          change: 15,
+          progress: 85,
+          trend: 'up'
         },
         { 
           id: 'analytics',
-          icon: BarChart, 
+          icon: Activity, 
           title: 'Analytics', 
           description: 'View sales analytics', 
-          bgColor: 'bg-yellow-100', 
-          textColor: 'text-yellow-600' 
+          bgColor: 'bg-gradient-to-br from-amber-50 via-amber-100 to-amber-50 border border-amber-200/50',
+          textColor: 'text-amber-600',
+          iconBgColor: 'bg-amber-100/80',
+          value: '98%',
+          change: 5,
+          progress: 98,
+          trend: 'up'
         },
       ];
     }
@@ -92,16 +146,26 @@ const DashboardPage = () => {
           icon: Users, 
           title: 'Users', 
           description: 'Manage all users', 
-          bgColor: 'bg-red-100', 
-          textColor: 'text-red-600' 
+          bgColor: 'bg-gradient-to-br from-red-50 via-red-100 to-red-50 border border-red-200/50',
+          textColor: 'text-red-600',
+          iconBgColor: 'bg-red-100/80',
+          value: '1.2K',
+          change: 8,
+          progress: 90,
+          trend: 'up'
         },
         { 
           id: 'admin-analytics',
           icon: BarChart, 
-          title: 'Admin Analytics', 
-          description: 'System analytics', 
-          bgColor: 'bg-purple-100', 
-          textColor: 'text-purple-600' 
+          title: 'System Analytics', 
+          description: 'Complete system overview', 
+          bgColor: 'bg-gradient-to-br from-violet-50 via-violet-100 to-violet-50 border border-violet-200/50',
+          textColor: 'text-violet-600',
+          iconBgColor: 'bg-violet-100/80',
+          value: '99.9%',
+          change: 0.1,
+          progress: 99,
+          trend: 'stable'
         },
       ];
     }
@@ -143,99 +207,93 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold">MP</span>
-              </div>
-              <h1 className="ml-3 text-2xl font-bold text-gray-800">Dashboard</h1>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center">
-                <img 
-                  src={user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'} 
-                  alt={user?.name || 'User'}
-                  className="w-10 h-10 rounded-full border-2 border-gray-200"
-                />
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-700">{user?.name || 'User'}</p>
-                  <p className="text-xs text-gray-500 capitalize">{user?.role || 'user'}</p>
-                </div>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="flex items-center px-4 py-2 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition focus:outline-none focus:ring-2 focus:ring-red-500"
-                aria-label="Logout"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+      {/* Dashboard Header */}
+      <DashboardHeader
+        title="Dashboard"
+        subtitle="MarketPlace Analytics"
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onSearch={handleSearch}
+      >
+        <UserPanel
+          user={user}
+          onLogout={handleLogout}
+          onSearch={handleSearch}
+          notifications={3}
+        />
+      </DashboardHeader>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Message */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-800">
-            Welcome back, {user?.name || 'User'}!
-          </h2>
-          <p className="text-gray-600 mt-2">
-            Here's what's happening with your {user?.role || 'user'} account today.
-          </p>
-        </div>
+        {/* Welcome Banner */}
+        <WelcomeBanner
+          userName={user?.name || 'User'}
+          userRole={user?.role || 'user'}
+          onExport={handleExport}
+          onFilter={handleFilter}
+        />
 
-        {/* Dashboard Stats Component */}
+        {/* Dashboard Stats */}
         <DashboardStats userRole={user?.role} />
 
-        {/* Stats Grid - Fixed key and accessibility issues */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {getDashboardCards().map((card) => (
-            <button
-              key={card.id}
-              type="button"
-              onClick={() => handleCardClick(card.id)}
-              className={`${card.bgColor} rounded-xl p-6 hover:shadow-lg transition cursor-pointer text-left focus:outline-none focus:ring-2 focus:ring-blue-500`}
-              aria-label={`Go to ${card.title}`}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{card.title}</p>
-                  <p className="text-2xl font-bold text-gray-800 mt-2">12</p>
-                  <p className="text-sm text-gray-500 mt-1">{card.description}</p>
-                </div>
-                <div className={`${card.textColor}`}>
-                  <card.icon className="h-8 w-8" />
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
+        {/* Stats Grid */}
+        <StatsGrid
+          cards={getDashboardCards()}
+          onCardClick={handleCardClick}
+        />
 
         {/* Charts and Recent Data Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
           {/* Sales Chart */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Sales Overview</h3>
+          <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Sales Overview</h3>
+                <p className="text-sm text-gray-600 mt-1">Monthly revenue trends</p>
+              </div>
+              <div className="flex gap-2 mt-2 sm:mt-0">
+                <button className="px-3 py-1.5 text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition">
+                  Monthly
+                </button>
+                <button className="px-3 py-1.5 text-sm bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition">
+                  Quarterly
+                </button>
+              </div>
+            </div>
             <SalesChart />
           </div>
           
           {/* Top Products */}
-          <div className="bg-white rounded-xl shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Top Products</h3>
+          <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Top Products</h3>
+                <p className="text-sm text-gray-600 mt-1">Best performing items</p>
+              </div>
+              <button className="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 hover:text-blue-700 mt-2 sm:mt-0">
+                View All
+              </button>
+            </div>
             <TopProducts />
           </div>
         </div>
 
-        {/* Recent Activity */}
-        <div className="bg-white rounded-xl shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Orders</h3>
+        {/* Recent Orders */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Recent Orders</h3>
+              <p className="text-sm text-gray-600 mt-1">Latest customer activities</p>
+            </div>
+            <div className="flex gap-3 mt-2 sm:mt-0">
+              <button className="flex items-center gap-2 px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                New Order
+              </button>
+              <button className="flex items-center gap-2 px-4 py-2 text-sm bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition">
+                Export
+              </button>
+            </div>
+          </div>
           <RecentOrders />
         </div>
       </main>

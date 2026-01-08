@@ -1,145 +1,85 @@
+// src/components/cart/CartSidebar.jsx
 import React from 'react';
-import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
 
-const CartSidebar = ({ items = [], isOpen = false, onClose, onCheckout }) => {
-  if (!isOpen) return null;
-
-  const calculateSubtotal = () => {
-    return items.reduce((total, item) => {
-      const price = item.discountedPrice || item.price;
-      return total + (price * item.quantity);
-    }, 0);
-  };
-
-  const itemCount = items.reduce((count, item) => count + item.quantity, 0);
-
+const CartSidebar = ({ savedItems, onMoveToCart, isLoading }) => {
+  if (!savedItems || savedItems.length === 0) return null;
+  
   return (
-    <>
-      {/* Overlay */}
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50 z-40"
-        onClick={onClose}
-      />
-
-      {/* Sidebar */}
-      <div className="fixed top-0 right-0 h-full w-full max-w-md bg-white shadow-xl z-50 flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Your Cart ({itemCount} {itemCount === 1 ? 'item' : 'items'})
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-500"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {/* Cart Items */}
-        <div className="flex-1 overflow-y-auto p-4">
-          {items.length === 0 ? (
-            <div className="text-center py-8">
-              <div className="text-gray-400 mb-4">
-                <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
+    <div className="bg-white rounded-xl shadow-sm p-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Saved for Later ({savedItems.length})</h3>
+      
+      <div className="space-y-4">
+        {savedItems.map((item) => {
+          const itemId = item.id || item._id || item.productId;
+          const price = extractPrice(item);
+          const name = item.name || item.title || 'Product';
+          const image = item.image || item.images?.[0] || item.imgUrl || '';
+          
+          return (
+            <div key={itemId} className="flex items-center border border-gray-200 rounded-lg p-3">
+              {/* Product Image */}
+              <div className="w-16 h-16 flex-shrink-0">
+                <img 
+                  src={image || '/placeholder-image.jpg'} 
+                  alt={name}
+                  className="w-full h-full object-cover rounded"
+                />
               </div>
-              <p className="text-gray-500">Your cart is empty</p>
-              <Link
-                to="/products"
-                onClick={onClose}
-                className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Start Shopping
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {items.map((item) => (
-                <div key={item.id} className="flex items-center space-x-3 p-3 border rounded-lg">
-                  <div className="h-16 w-16 flex-shrink-0 rounded overflow-hidden">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-medium text-gray-900 truncate">
-                      {item.name}
-                    </h4>
-                    <div className="mt-1 flex items-center justify-between">
-                      <div className="text-sm text-gray-500">
-                        Qty: {item.quantity}
-                      </div>
-                      <div className="text-sm font-medium text-gray-900">
-                        ${((item.discountedPrice || item.price) * item.quantity).toFixed(2)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        {items.length > 0 && (
-          <div className="border-t p-4 space-y-4">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Subtotal</span>
-              <span className="font-semibold">${calculateSubtotal().toFixed(2)}</span>
-            </div>
-            
-            <div className="text-xs text-gray-500 text-center">
-              Shipping & taxes calculated at checkout
-            </div>
-
-            <div className="space-y-2">
+              
+              {/* Product Info */}
+              <div className="ml-3 flex-grow">
+                <h4 className="font-medium text-gray-900">{name}</h4>
+                <p className="text-gray-600">${price.toFixed(2)}</p>
+              </div>
+              
+              {/* Move to Cart Button */}
               <button
-                onClick={onCheckout}
-                className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700"
+                onClick={() => onMoveToCart(itemId)}
+                disabled={isLoading}
+                className="ml-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
               >
-                Checkout Now
+                Move to Cart
               </button>
-              <Link
-                to="/cart"
-                onClick={onClose}
-                className="block w-full text-center border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50"
-              >
-                View Full Cart
-              </Link>
             </div>
-          </div>
-        )}
+          );
+        })}
       </div>
-    </>
+    </div>
   );
 };
 
-CartSidebar.propTypes = {
-  items: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
-      name: PropTypes.string.isRequired,
-      price: PropTypes.number.isRequired,
-      discountedPrice: PropTypes.number,
-      image: PropTypes.string.isRequired,
-      quantity: PropTypes.number.isRequired
-    })
-  ),
-  isOpen: PropTypes.bool,
-  onClose: PropTypes.func.isRequired,
-  onCheckout: PropTypes.func.isRequired
-};
-
-CartSidebar.defaultProps = {
-  items: [],
-  isOpen: false
+// Helper function to extract price (same as in CartPage)
+const extractPrice = (item) => {
+  if (!item) return 0;
+  
+  let price = 0;
+  const itemPrice = item.price;
+  
+  if (itemPrice) {
+    if (typeof itemPrice === 'object') {
+      price = itemPrice.value || itemPrice.amount || itemPrice.current || 
+              itemPrice.regular || itemPrice.price || itemPrice.base || 0;
+    } else if (typeof itemPrice === 'number') {
+      price = itemPrice;
+    } else if (typeof itemPrice === 'string') {
+      price = Number.parseFloat(itemPrice) || 0;
+    }
+  }
+  
+  // Check for sale price (if available)
+  if (item.salePrice || item.discountedPrice) {
+    const salePrice = item.salePrice || item.discountedPrice;
+    if (typeof salePrice === 'object') {
+      price = salePrice.value || salePrice.amount || price;
+    } else if (typeof salePrice === 'number') {
+      price = salePrice;
+    } else if (typeof salePrice === 'string') {
+      const parsed = Number.parseFloat(salePrice);
+      if (!Number.isNaN(parsed)) price = parsed;
+    }
+  }
+  
+  return price;
 };
 
 export default CartSidebar;
