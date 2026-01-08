@@ -1,85 +1,174 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CartItem from '../components/cart/CartItem';
 import CartSidebar from '../components/cart/CartSidebar';
 import CartSummary from '../components/cart/CartSummary';
-
-// Mock cart data - replace with your actual state management
-const mockCartItems = [
-  {
-    id: 1,
-    name: 'Premium Wireless Headphones',
-    price: 129.99,
-    quantity: 2,
-    image: 'https://via.placeholder.com/100x100',
-    inStock: true,
-    maxQuantity: 10
-  },
-  {
-    id: 2,
-    name: 'Smart Watch Series 5',
-    price: 299.99,
-    quantity: 1,
-    image: 'https://via.placeholder.com/100x100',
-    inStock: true,
-    maxQuantity: 5
-  },
-  {
-    id: 3,
-    name: 'USB-C Laptop Charger',
-    price: 39.99,
-    quantity: 3,
-    image: 'https://via.placeholder.com/100x100',
-    inStock: false,
-    maxQuantity: 20
-  }
-];
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import { useCart } from '../context/useCart';
+import { useAuth } from '../context/useAuth';
 
 const CartPage = () => {
-  const [cartItems, setCartItems] = useState(mockCartItems);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { 
+    cartItems, 
+    loading, 
+    error,
+    updateQuantity, 
+    removeItem, 
+    saveForLater, 
+    moveToCart,
+    clearCart,
+    savedItems
+  } = useCart();
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [localLoading, setLocalLoading] = useState(false);
 
-  const handleQuantityChange = (id, newQuantity) => {
-    setCartItems(prevItems => 
-      prevItems.map(item => 
-        item.id === id ? { ...item, quantity: Math.max(1, newQuantity) } : item
-      )
-    );
+  // Calculate totals manually if getCartTotals doesn't exist
+  const calculateCartTotals = () => {
+    const subtotal = cartItems.reduce((sum, item) => {
+      // Handle both price formats (could be object or number)
+      const price = typeof item.price === 'object' ? item.price.value || item.price.amount || 0 : item.price || 0;
+      return sum + (price * (item.quantity || 1));
+    }, 0);
+    
+    const shipping = subtotal > 50 ? 0 : 5.99;
+    const tax = subtotal * 0.08; // 8% tax
+    const total = subtotal + shipping + tax;
+    const totalItems = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+
+    return { subtotal, shipping, tax, total, totalItems };
   };
 
-  const handleRemoveItem = (id) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== id));
+  const { subtotal, shipping, tax, total, totalItems } = calculateCartTotals();
+
+  const handleQuantityChange = async (id, newQuantity) => {
+    setLocalLoading(true);
+    try {
+      await updateQuantity(id, newQuantity);
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      alert('Failed to update quantity. Please try again.');
+    } finally {
+      setLocalLoading(false);
+    }
   };
 
-  const handleSaveForLater = (id) => {
-    console.log('Saving item for later:', id);
-    // Implement save for later functionality
+  const handleRemoveItem = async (id) => {
+    if (window.confirm('Are you sure you want to remove this item from your cart?')) {
+      setLocalLoading(true);
+      try {
+        await removeItem(id);
+      } catch (error) {
+        console.error('Error removing item:', error);
+        alert('Failed to remove item. Please try again.');
+      } finally {
+        setLocalLoading(false);
+      }
+    }
   };
 
-  const handleMoveToCart = (id) => {
-    console.log('Moving item to cart:', id);
-    // Implement move to cart functionality
+  const handleSaveForLater = async (id) => {
+    setLocalLoading(true);
+    try {
+      await saveForLater(id);
+    } catch (error) {
+      console.error('Error saving item:', error);
+      alert('Failed to save item. Please try again.');
+    } finally {
+      setLocalLoading(false);
+    }
+  };
+
+  const handleMoveToCart = async (id) => {
+    setLocalLoading(true);
+    try {
+      await moveToCart(id);
+    } catch (error) {
+      console.error('Error moving item to cart:', error);
+      alert('Failed to move item to cart. Please try again.');
+    } finally {
+      setLocalLoading(false);
+    }
   };
 
   const handleCheckout = () => {
-    console.log('Proceeding to checkout');
-    // Navigate to checkout page
+    if (!user) {
+      navigate('/login', { state: { from: '/cart' } });
+      return;
+    }
+    
+    if (cartItems.length === 0) {
+      alert('Your cart is empty. Add items before checkout.');
+      return;
+    }
+    
+    // Check for out of stock items
+    const outOfStockItems = cartItems.filter(item => item.inStock === false);
+    if (outOfStockItems.length > 0) {
+      alert('Please remove out of stock items before proceeding to checkout.');
+      return;
+    }
+    
+    navigate('/checkout');
   };
 
   const handleContinueShopping = () => {
-    console.log('Continuing shopping');
-    // Navigate back to products
+    navigate('/products');
+  };
+
+  const handleClearCart = async () => {
+    if (window.confirm('Are you sure you want to clear your cart? This action cannot be undone.')) {
+      setLocalLoading(true);
+      try {
+        await clearCart();
+      } catch (error) {
+        console.error('Error clearing cart:', error);
+        alert('Failed to clear cart. Please try again.');
+      } finally {
+        setLocalLoading(false);
+      }
+    }
   };
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  // Calculate cart totals
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = subtotal > 50 ? 0 : 5.99;
-  const tax = subtotal * 0.08; // 8% tax
-  const total = subtotal + shipping + tax;
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  // Debug: Check what's in useCart hook
+  useEffect(() => {
+    console.log('Cart items:', cartItems);
+    console.log('Saved items:', savedItems);
+  }, [cartItems, savedItems]);
+
+  // Show loading state
+  if (loading || localLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <LoadingSpinner size="large" />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-600 text-4xl mb-4">⚠️</div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error Loading Cart</h2>
+          <p className="text-gray-600 mb-4">{error.message || 'Failed to load cart'}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -93,14 +182,16 @@ const CartPage = () => {
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={toggleSidebar}
-                    className="lg:hidden flex items-center text-gray-600 hover:text-gray-900"
+                    className="lg:hidden flex items-center text-gray-600 hover:text-gray-900 p-2"
                   >
                     <span className="mr-2">Cart Summary</span>
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
-                  <span className="text-gray-600">{totalItems} items</span>
+                  <span className="text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+                    {totalItems} {totalItems === 1 ? 'item' : 'items'}
+                  </span>
                 </div>
               </div>
 
@@ -112,7 +203,7 @@ const CartPage = () => {
                     </svg>
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Your cart is empty</h3>
-                  <p className="text-gray-600 mb-6">Add some items to your cart to get started!</p>
+                  <p className="text-gray-600 mb-6">Looks like you haven't added any items to your cart yet.</p>
                   <button
                     onClick={handleContinueShopping}
                     className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
@@ -126,7 +217,7 @@ const CartPage = () => {
                   <div className="space-y-4">
                     {cartItems.map((item) => (
                       <CartItem
-                        key={item.id}
+                        key={item.id || item._id}
                         item={item}
                         onQuantityChange={handleQuantityChange}
                         onRemove={handleRemoveItem}
@@ -140,26 +231,22 @@ const CartPage = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                       <button
                         onClick={handleContinueShopping}
-                        className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                        className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors w-full sm:w-auto"
                       >
                         ← Continue Shopping
                       </button>
                       
-                      <div className="flex gap-3">
+                      <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                         <button
-                          onClick={() => {
-                            if (window.confirm('Are you sure you want to clear your cart?')) {
-                              setCartItems([]);
-                            }
-                          }}
+                          onClick={handleClearCart}
                           className="px-6 py-3 border border-red-300 text-red-600 font-medium rounded-lg hover:bg-red-50 transition-colors"
                         >
                           Clear Cart
                         </button>
                         <button
                           onClick={() => {
-                            // Save cart functionality
-                            console.log('Cart saved');
+                            // Optional: Implement save cart functionality
+                            alert('Cart saved! You can retrieve it later.');
                           }}
                           className="px-6 py-3 border border-blue-300 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors"
                         >
@@ -172,20 +259,38 @@ const CartPage = () => {
               )}
             </div>
 
-            {/* Recently Viewed / Recommendations Section */}
+            {/* Recommendations Section - Only show if cart has items */}
             {cartItems.length > 0 && (
               <div className="mt-8 bg-white rounded-xl shadow-sm p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Frequently bought together</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">You might also like</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {/* Add recommendation items here */}
+                  <div className="text-center text-gray-500 py-8 border-2 border-dashed border-gray-200 rounded-lg">
+                    <svg className="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <p className="text-sm">More products coming soon</p>
+                  </div>
                 </div>
               </div>
             )}
           </div>
 
           {/* Cart Summary Sidebar */}
-          <div className={`lg:w-1/3 ${isSidebarOpen ? 'block' : 'hidden lg:block'}`}>
+          <div className={`lg:w-1/3 ${isSidebarOpen ? 'block fixed top-0 right-0 h-full w-4/5 z-50 bg-white p-6 overflow-y-auto shadow-2xl' : 'hidden lg:block'}`}>
             <div className="sticky top-8">
+              {isSidebarOpen && (
+                <div className="flex justify-between items-center mb-6 lg:hidden">
+                  <h2 className="text-xl font-bold text-gray-900">Order Summary</h2>
+                  <button
+                    onClick={toggleSidebar}
+                    className="p-2 text-gray-500 hover:text-gray-700"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              )}
               <CartSummary
                 subtotal={subtotal}
                 shipping={shipping}
@@ -193,18 +298,21 @@ const CartPage = () => {
                 total={total}
                 totalItems={totalItems}
                 onCheckout={handleCheckout}
+                isCheckoutDisabled={cartItems.length === 0 || cartItems.some(item => item.inStock === false)}
               />
             </div>
           </div>
         </div>
 
-        {/* Cart Sidebar (Saved Items, etc.) */}
-        <div className="mt-8">
-          <CartSidebar
-            savedItems={[]} // Pass saved items here
-            onMoveToCart={handleMoveToCart}
-          />
-        </div>
+        {/* Saved Items Sidebar */}
+        {savedItems && savedItems.length > 0 && (
+          <div className="mt-8">
+            <CartSidebar
+              savedItems={savedItems}
+              onMoveToCart={handleMoveToCart}
+            />
+          </div>
+        )}
 
         {/* Mobile Sidebar Overlay */}
         {isSidebarOpen && (

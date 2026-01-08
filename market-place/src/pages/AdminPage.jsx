@@ -11,7 +11,6 @@ import {
   Package, 
   BarChart, 
   Shield, 
-  Settings,
   AlertCircle,
   CheckCircle,
   XCircle
@@ -47,6 +46,49 @@ const AdminPage = () => {
     }
   };
 
+  // Helper function to get status badge class
+  const getStatusBadgeClass = (status) => {
+    if (status === 'success') return 'bg-green-100 text-green-800';
+    if (status === 'pending') return 'bg-yellow-100 text-yellow-800';
+    return 'bg-red-100 text-red-800';
+  };
+
+  // Quick actions buttons data
+  const quickActions = [
+    { 
+      id: 'users',
+      label: 'Manage Users', 
+      icon: <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />,
+      bgColor: 'bg-blue-50',
+      hoverColor: 'hover:bg-blue-100',
+      onClick: () => setActiveTab('users')
+    },
+    { 
+      id: 'products',
+      label: 'Product Approval', 
+      icon: <Package className="h-8 w-8 text-green-600 mx-auto mb-2" />,
+      bgColor: 'bg-green-50',
+      hoverColor: 'hover:bg-green-100',
+      onClick: () => setActiveTab('products')
+    },
+    { 
+      id: 'transactions',
+      label: 'Transactions', 
+      icon: <BarChart className="h-8 w-8 text-purple-600 mx-auto mb-2" />,
+      bgColor: 'bg-purple-50',
+      hoverColor: 'hover:bg-purple-100',
+      onClick: () => setActiveTab('transactions')
+    },
+    { 
+      id: 'reports',
+      label: 'Reports', 
+      icon: <Shield className="h-8 w-8 text-yellow-600 mx-auto mb-2" />,
+      bgColor: 'bg-yellow-50',
+      hoverColor: 'hover:bg-yellow-100',
+      onClick: () => setActiveTab('reports')
+    },
+  ];
+
   const renderContent = () => {
     switch(activeTab) {
       case 'dashboard':
@@ -61,7 +103,10 @@ const AdminPage = () => {
                 <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
                   Generate Report
                 </button>
-                <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <button 
+                  onClick={() => setActiveTab('settings')}
+                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
                   Settings
                 </button>
               </div>
@@ -87,11 +132,7 @@ const AdminPage = () => {
                           </p>
                         </div>
                       </div>
-                      <span className={`px-2 py-1 text-xs rounded-full ${
-                        activity.status === 'success' ? 'bg-green-100 text-green-800' :
-                        activity.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusBadgeClass(activity.status)}`}>
                         {activity.status}
                       </span>
                     </div>
@@ -103,34 +144,16 @@ const AdminPage = () => {
               <div className="bg-white rounded-xl shadow p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <button 
-                    onClick={() => setActiveTab('users')}
-                    className="p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition text-center"
-                  >
-                    <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                    <span className="text-sm font-medium text-gray-700">Manage Users</span>
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('products')}
-                    className="p-4 bg-green-50 rounded-lg hover:bg-green-100 transition text-center"
-                  >
-                    <Package className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                    <span className="text-sm font-medium text-gray-700">Product Approval</span>
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('transactions')}
-                    className="p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition text-center"
-                  >
-                    <BarChart className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-                    <span className="text-sm font-medium text-gray-700">Transactions</span>
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('reports')}
-                    className="p-4 bg-yellow-50 rounded-lg hover:bg-yellow-100 transition text-center"
-                  >
-                    <Shield className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-                    <span className="text-sm font-medium text-gray-700">Reports</span>
-                  </button>
+                  {quickActions.map(action => (
+                    <button 
+                      key={action.id}
+                      onClick={action.onClick}
+                      className={`p-4 ${action.bgColor} rounded-lg ${action.hoverColor} transition text-center`}
+                    >
+                      {action.icon}
+                      <span className="text-sm font-medium text-gray-700">{action.label}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>

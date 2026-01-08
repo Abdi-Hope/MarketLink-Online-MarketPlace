@@ -112,7 +112,7 @@ const WishlistPage = () => {
             <button 
               className="btn btn-danger"
               onClick={() => {
-                if (window.confirm('Are you sure you want to clear your wishlist?')) {
+                if (globalThis.confirm('Are you sure you want to clear your wishlist?')) {
                   setWishlistItems([]);
                 }
               }}

@@ -39,20 +39,79 @@ const HelpPage = () => {
 
   // Popular articles
   const popularArticles = [
-    { title: 'How to track my order', category: 'orders', reads: '1.2k' },
-    { title: 'Setting up payment methods', category: 'payments', reads: '890' },
-    { title: 'Return policy explained', category: 'buyer', reads: '2.1k' },
-    { title: 'Seller verification process', category: 'seller', reads: '750' },
-    { title: 'Troubleshooting login issues', category: 'technical', reads: '1.5k' },
+    { 
+      id: 'article-1', 
+      title: 'How to track my order', 
+      category: 'orders', 
+      reads: '1.2k' 
+    },
+    { 
+      id: 'article-2', 
+      title: 'Setting up payment methods', 
+      category: 'payments', 
+      reads: '890' 
+    },
+    { 
+      id: 'article-3', 
+      title: 'Return policy explained', 
+      category: 'buyer', 
+      reads: '2.1k' 
+    },
+    { 
+      id: 'article-4', 
+      title: 'Seller verification process', 
+      category: 'seller', 
+      reads: '750' 
+    },
+    { 
+      id: 'article-5', 
+      title: 'Troubleshooting login issues', 
+      category: 'technical', 
+      reads: '1.5k' 
+    },
   ];
 
   // Contact methods
   const contactMethods = [
-    { type: 'Email', details: 'support@marketplace.com', response: 'Within 24 hours', icon: '✉️' },
-    { type: 'Live Chat', details: 'Available 9AM-6PM EST', response: 'Instant', icon: '💬' },
-    { type: 'Phone', details: '+1 (800) 123-4567', response: 'Within 30 min', icon: '📞' },
-    { type: 'Community Forum', details: 'Ask other users', response: 'Varies', icon: '👥' },
+    { 
+      id: 'contact-email', 
+      type: 'Email', 
+      details: 'support@marketplace.com', 
+      response: 'Within 24 hours', 
+      icon: '✉️' 
+    },
+    { 
+      id: 'contact-chat', 
+      type: 'Live Chat', 
+      details: 'Available 9AM-6PM EST', 
+      response: 'Instant', 
+      icon: '💬' 
+    },
+    { 
+      id: 'contact-phone', 
+      type: 'Phone', 
+      details: '+1 (800) 123-4567', 
+      response: 'Within 30 min', 
+      icon: '📞' 
+    },
+    { 
+      id: 'contact-forum', 
+      type: 'Community Forum', 
+      details: 'Ask other users', 
+      response: 'Varies', 
+      icon: '👥' 
+    },
   ];
+
+  // Helper function to generate article key
+  const getArticleKey = (article) => {
+    return article.id || `article-${article.title}`;
+  };
+
+  // Helper function to generate contact method key
+  const getContactMethodKey = (method) => {
+    return method.id || `contact-${method.type}`;
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -173,9 +232,9 @@ const HelpPage = () => {
                 Popular Help Articles
               </h2>
               <div className="space-y-4">
-                {popularArticles.map((article, index) => (
+                {popularArticles.map((article) => (
                   <div
-                    key={index}
+                    key={getArticleKey(article)}
                     className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     <div>
@@ -204,9 +263,9 @@ const HelpPage = () => {
                 Contact Support
               </h2>
               <div className="space-y-4">
-                {contactMethods.map((method, index) => (
+                {contactMethods.map((method) => (
                   <div
-                    key={index}
+                    key={getContactMethodKey(method)}
                     className="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors"
                   >
                     <div className="flex items-start space-x-3">

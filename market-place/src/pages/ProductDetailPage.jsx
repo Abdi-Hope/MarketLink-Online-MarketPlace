@@ -39,12 +39,12 @@ const ProductDetailPage = () => {
           rating: 4.5,
           reviewCount: 128,
           features: [
-            'Active Noise Cancellation',
-            '30-hour battery life',
-            'Bluetooth 5.0',
-            'Built-in microphone',
-            'Foldable design',
-            'Carrying case included'
+            { id: 'feat-1', text: 'Active Noise Cancellation' },
+            { id: 'feat-2', text: '30-hour battery life' },
+            { id: 'feat-3', text: 'Bluetooth 5.0' },
+            { id: 'feat-4', text: 'Built-in microphone' },
+            { id: 'feat-5', text: 'Foldable design' },
+            { id: 'feat-6', text: 'Carrying case included' }
           ],
           specifications: {
             brand: 'AudioTech',
@@ -126,6 +126,50 @@ const ProductDetailPage = () => {
     return 'Add to Cart';
   };
 
+  // Helper function to get delivery estimate
+  const getDeliveryEstimate = () => {
+    if (!product) return '';
+    
+    if (product.stock > 20) {
+      return '1-2 business days';
+    }
+    if (product.stock > 5) {
+      return '3-5 business days';
+    }
+    return '7-10 business days';
+  };
+
+  // Helper function to generate image key
+  const getImageKey = (imgIndex) => {
+    return `img-${productId}-${imgIndex}`;
+  };
+
+  // Helper function to generate star key
+  const getStarKey = (starIndex) => {
+    return `star-${productId}-${starIndex}`;
+  };
+
+  // Helper function to generate feature key
+  const getFeatureKey = (feature) => {
+    return feature.id || `feature-${feature.text}`;
+  };
+
+  // Helper function to generate specification key
+  const getSpecKey = (key) => {
+    return `spec-${productId}-${key}`;
+  };
+
+  // Helper function to get add to cart button class
+  const getAddToCartButtonClass = () => {
+    if (isInCart) {
+      return 'bg-green-600 hover:bg-green-700 text-white';
+    }
+    if (product?.stock <= 0) {
+      return 'bg-gray-300 text-gray-500 cursor-not-allowed';
+    }
+    return 'bg-blue-600 hover:bg-blue-700 text-white';
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -151,6 +195,8 @@ const ProductDetailPage = () => {
   }
 
   const stockStatus = getStockStatus();
+  const deliveryEstimate = getDeliveryEstimate();
+  const addToCartButtonClass = getAddToCartButtonClass();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -213,7 +259,7 @@ const ProductDetailPage = () => {
             <div className="flex space-x-3">
               {product.images.map((img, imgIndex) => (
                 <button
-                  key={`img-${imgIndex}`}
+                  key={getImageKey(imgIndex)}
                   onClick={() => setSelectedImage(imgIndex)}
                   className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
                     selectedImage === imgIndex 
@@ -269,12 +315,12 @@ const ProductDetailPage = () => {
             {/* Rating */}
             <div className="flex items-center mb-6">
               <div className="flex">
-                {Array.from({ length: 5 }).map((_, i) => (
+                {Array.from({ length: 5 }).map((_, starIndex) => (
                   <Star
-                    key={`star-${i}`}
+                    key={getStarKey(starIndex)}
                     size={20}
                     className={`${
-                      i < Math.floor(product.rating) 
+                      starIndex < Math.floor(product.rating) 
                         ? 'text-yellow-400 fill-yellow-400' 
                         : 'text-gray-300'
                     }`}
@@ -315,6 +361,13 @@ const ProductDetailPage = () => {
                   Only {product.stock} left in stock!
                 </span>
               )}
+            </div>
+
+            {/* Delivery Estimate */}
+            <div className="mb-6">
+              <p className="text-gray-700">
+                <span className="font-medium">Delivery:</span> {deliveryEstimate}
+              </p>
             </div>
 
             {/* Description */}
@@ -359,13 +412,7 @@ const ProductDetailPage = () => {
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock <= 0}
-                className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 rounded-lg font-semibold transition-colors ${
-                  isInCart
-                    ? 'bg-green-600 hover:bg-green-700 text-white'
-                    : product.stock <= 0
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
-                }`}
+                className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 rounded-lg font-semibold transition-colors ${addToCartButtonClass}`}
               >
                 <ShoppingCart size={22} />
                 {getAddToCartButtonText()}
@@ -394,10 +441,10 @@ const ProductDetailPage = () => {
               <div className="mt-8">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Key Features</h3>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {product.features.map((feature, featureIndex) => (
-                    <li key={`feature-${featureIndex}`} className="flex items-center text-gray-700">
+                  {product.features.map(feature => (
+                    <li key={getFeatureKey(feature)} className="flex items-center text-gray-700">
                       <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                      {feature}
+                      {feature.text}
                     </li>
                   ))}
                 </ul>
@@ -414,7 +461,7 @@ const ProductDetailPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
                 {Object.entries(product.specifications).map(([key, value]) => (
                   <div 
-                    key={key} 
+                    key={getSpecKey(key)} 
                     className="flex items-center px-6 py-4 border-b border-gray-100 even:bg-gray-50"
                   >
                     <span className="w-1/3 font-medium text-gray-700 capitalize">
