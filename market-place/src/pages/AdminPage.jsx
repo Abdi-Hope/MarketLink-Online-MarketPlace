@@ -6,19 +6,21 @@ import UserManagement from '../components/admin/UserManagement';
 import ProductApproval from '../components/admin/ProductApproval';
 import TransactionLog from '../components/admin/TransactionLog';
 import ReportGenerator from '../components/admin/ReportGenerator';
-import { 
-  Users, 
-  Package, 
-  BarChart, 
-  Shield, 
+import SellerCategories from '../components/seller/SellerCategories';
+import {
+  Users,
+  Package,
+  BarChart,
+  Shield,
   AlertCircle,
   CheckCircle,
-  XCircle
+  XCircle,
+  Tag
 } from 'lucide-react';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  
+
   // Mock admin data
   const adminStats = {
     totalUsers: 1245,
@@ -28,7 +30,7 @@ const AdminPage = () => {
     todayOrders: 45,
     activeSellers: 89
   };
-  
+
   // Recent activities
   const recentActivities = [
     { id: 1, type: 'user', action: 'New user registered', user: 'John Doe', time: '5 min ago', status: 'success' },
@@ -38,7 +40,7 @@ const AdminPage = () => {
   ];
 
   const getStatusIcon = (status) => {
-    switch(status) {
+    switch (status) {
       case 'success': return <CheckCircle className="h-4 w-4 text-green-500" />;
       case 'pending': return <AlertCircle className="h-4 w-4 text-yellow-500" />;
       case 'warning': return <XCircle className="h-4 w-4 text-red-500" />;
@@ -55,42 +57,50 @@ const AdminPage = () => {
 
   // Quick actions buttons data
   const quickActions = [
-    { 
+    {
       id: 'users',
-      label: 'Manage Users', 
+      label: 'Manage Users',
       icon: <Users className="h-8 w-8 text-blue-600 mx-auto mb-2" />,
       bgColor: 'bg-blue-50',
       hoverColor: 'hover:bg-blue-100',
       onClick: () => setActiveTab('users')
     },
-    { 
+    {
       id: 'products',
-      label: 'Product Approval', 
+      label: 'Product Approval',
       icon: <Package className="h-8 w-8 text-green-600 mx-auto mb-2" />,
       bgColor: 'bg-green-50',
       hoverColor: 'hover:bg-green-100',
       onClick: () => setActiveTab('products')
     },
-    { 
+    {
       id: 'transactions',
-      label: 'Transactions', 
+      label: 'Transactions',
       icon: <BarChart className="h-8 w-8 text-purple-600 mx-auto mb-2" />,
       bgColor: 'bg-purple-50',
       hoverColor: 'hover:bg-purple-100',
       onClick: () => setActiveTab('transactions')
     },
-    { 
+    {
       id: 'reports',
-      label: 'Reports', 
+      label: 'Reports',
       icon: <Shield className="h-8 w-8 text-yellow-600 mx-auto mb-2" />,
       bgColor: 'bg-yellow-50',
       hoverColor: 'hover:bg-yellow-100',
       onClick: () => setActiveTab('reports')
     },
+    {
+      id: 'categories',
+      label: 'Categories',
+      icon: <Tag className="h-8 w-8 text-indigo-600 mx-auto mb-2" />,
+      bgColor: 'bg-indigo-50',
+      hoverColor: 'hover:bg-indigo-100',
+      onClick: () => setActiveTab('categories')
+    },
   ];
 
   const renderContent = () => {
-    switch(activeTab) {
+    switch (activeTab) {
       case 'dashboard':
         return (
           <div className="space-y-6">
@@ -103,7 +113,7 @@ const AdminPage = () => {
                 <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
                   Generate Report
                 </button>
-                <button 
+                <button
                   onClick={() => setActiveTab('settings')}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
@@ -111,9 +121,9 @@ const AdminPage = () => {
                 </button>
               </div>
             </div>
-            
+
             <AdminStats stats={adminStats} />
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Recent Activities */}
               <div className="bg-white rounded-xl shadow p-6">
@@ -139,13 +149,13 @@ const AdminPage = () => {
                   ))}
                 </div>
               </div>
-              
+
               {/* Quick Actions */}
               <div className="bg-white rounded-xl shadow p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
                 <div className="grid grid-cols-2 gap-4">
                   {quickActions.map(action => (
-                    <button 
+                    <button
                       key={action.id}
                       onClick={action.onClick}
                       className={`p-4 ${action.bgColor} rounded-lg ${action.hoverColor} transition text-center`}
@@ -159,19 +169,22 @@ const AdminPage = () => {
             </div>
           </div>
         );
-      
+
       case 'users':
         return <UserManagement />;
-      
+
       case 'products':
         return <ProductApproval />;
-      
+
       case 'transactions':
         return <TransactionLog />;
-      
+
       case 'reports':
         return <ReportGenerator />;
-      
+
+      case 'categories':
+        return <SellerCategories />;
+
       case 'settings':
         return (
           <div className="bg-white rounded-xl shadow p-6">
@@ -181,7 +194,7 @@ const AdminPage = () => {
             </div>
           </div>
         );
-      
+
       default:
         return (
           <div className="bg-white rounded-xl shadow p-6">
@@ -197,7 +210,7 @@ const AdminPage = () => {
       <div className="flex">
         {/* Admin Sidebar */}
         <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-        
+
         {/* Main Content */}
         <div className="flex-1 p-6 lg:p-8">
           {renderContent()}

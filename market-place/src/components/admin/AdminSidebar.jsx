@@ -1,15 +1,16 @@
 // src/components/admin/AdminSidebar.jsx
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  Users, 
-  Package, 
-  CreditCard, 
-  BarChart, 
+import {
+  LayoutDashboard,
+  Users,
+  Package,
+  CreditCard,
+  BarChart,
   Settings,
   LogOut,
   Shield,
-  AlertCircle
+  AlertCircle,
+  Tag
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
@@ -28,6 +29,7 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
     { id: 'users', label: 'User Management', icon: <Users size={20} /> },
     { id: 'products', label: 'Product Approval', icon: <Package size={20} />, badge: 5 },
     { id: 'transactions', label: 'Transactions', icon: <CreditCard size={20} /> },
+    { id: 'categories', label: 'Categories', icon: <Tag size={20} /> },
     { id: 'reports', label: 'Reports', icon: <BarChart size={20} /> },
     { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
   ];
@@ -54,11 +56,10 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
             <li key={item.id}>
               <button
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all ${
-                  activeTab === item.id
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all ${activeTab === item.id
                     ? 'bg-blue-600 text-white'
                     : 'hover:bg-gray-800 text-gray-300'
-                }`}
+                  }`}
               >
                 <div className="flex items-center space-x-3">
                   {item.icon}
@@ -110,7 +111,7 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
             </div>
           </div>
         </div>
-        
+
         <button
           onClick={handleLogout}
           className="w-full flex items-center justify-center space-x-2 px-4 py-2 bg-gray-800 hover:bg-red-600 rounded-lg transition"
@@ -118,7 +119,7 @@ const AdminSidebar = ({ activeTab, setActiveTab }) => {
           <LogOut size={18} />
           <span>Logout</span>
         </button>
-        
+
         <div className="mt-4 text-center text-xs text-gray-500">
           <p>MarketPlace Admin v1.0</p>
           <p className="mt-1">© {new Date().getFullYear()}</p>

@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { AuthContext } from './AuthContext';
+import authService from '../services/authService';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -12,7 +13,7 @@ export const AuthProvider = ({ children }) => {
     const checkStoredUser = () => {
       const storedUser = localStorage.getItem('marketplace_user');
       const token = localStorage.getItem('marketplace_token');
-      
+
       if (storedUser && token) {
         try {
           const parsedUser = JSON.parse(storedUser);
@@ -31,104 +32,75 @@ export const AuthProvider = ({ children }) => {
 
   const login = useCallback(async (email, password) => {
     try {
-      console.log('Attempting login with:', email);
-      
-      // Simulate API call - replace with actual API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Demo users - replace with actual API response
-      let userInfo = null;
-      
-      if (email === 'user@example.com' && password === 'password123') {
-        userInfo = {
-          id: '1',
-          email: 'user@example.com',
-          name: 'Demo User',
-          role: 'user',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=user'
-        };
-      } else if (email === 'seller@example.com' && password === 'password123') {
-        userInfo = {
-          id: '2',
-          email: 'seller@example.com',
-          name: 'Demo Seller',
-          role: 'seller',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=seller',
-          storeName: 'Awesome Store'
-        };
-      } else if (email === 'admin@example.com' && password === 'password123') {
-        userInfo = {
-          id: '3',
-          email: 'admin@example.com',
-          name: 'Demo Admin',
-          role: 'admin',
-          avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin'
-        };
-      } else {
-        return {
-          success: false,
-          message: 'Invalid email or password'
-        };
+      const result = await authService.login(email, password);
+
+      if (result.success) {
+        const { token, success, message, ...userData } = result;
+        localStorage.setItem('marketplace_token', token);
+        localStorage.setItem('marketplace_user', JSON.stringify(userData));
+        setUser(userData);
       }
 
-      // Store user data
-      const token = `demo-token-${Date.now()}`;
-      localStorage.setItem('marketplace_token', token);
-      localStorage.setItem('marketplace_user', JSON.stringify(userInfo));
-      setUser(userInfo);
-
-      return {
-        success: true,
-        user: userInfo,
-        token,
-        message: 'Login successful'
-      };
-
+      return result;
     } catch (error) {
-      console.error('Login error:', error);
       return {
         success: false,
-        message: error.message || 'Network error. Please try again.'
+        message: error.message || 'Login failed'
       };
     }
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('marketplace_token');
-    localStorage.removeItem('marketplace_user');
+    authService.logout();
     setUser(null);
     return { success: true };
   }, []);
 
-  const register = useCallback(async () => {
+  const register = useCallback(async (userData) => {
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return {
-        success: true,
-        message: 'Registration successful! Please login.'
-      };
-    } catch {
+      const result = await authService.register(userData);
+      return result;
+    } catch (error) {
       return {
         success: false,
-        message: 'Registration failed'
+        message: error.message || 'Registration failed'
+      };
+    }
+  }, []);
+
+  const googleLogin = useCallback(async (data) => {
+    try {
+      const result = await authService.googleLogin(data);
+      if (result.success) {
+        const { token, success, message, ...userData } = result;
+        localStorage.setItem('marketplace_token', token);
+        localStorage.setItem('marketplace_user', JSON.stringify(userData));
+        setUser(userData);
+      }
+      return result;
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || 'Google Login failed'
       };
     }
   }, []);
 
   const updateProfile = useCallback(async (profileData) => {
     try {
+      // Typically you'd have a userService.updateProfile(profileData) call here
       const updatedUser = { ...user, ...profileData };
       localStorage.setItem('marketplace_user', JSON.stringify(updatedUser));
       setUser(updatedUser);
-      return { 
-        success: true, 
+      return {
+        success: true,
         user: updatedUser,
         message: 'Profile updated successfully'
       };
     } catch {
-      return { 
-        success: false, 
-        message: 'Failed to update profile' 
+      return {
+        success: false,
+        message: 'Failed to update profile'
       };
     }
   }, [user]);
@@ -139,10 +111,11 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     register,
+    googleLogin,
     updateProfile,
     loading,
     isAuthenticated: !!user
-  }), [user, loading, login, logout, register, updateProfile]);
+  }), [user, loading, login, logout, register, googleLogin, updateProfile]);
 
   return (
     <AuthContext.Provider value={value}>

@@ -31,7 +31,6 @@ const SalesChart = () => {
 
     const labels = ranges[timeRange];
     return labels.map((label) => {
-      // Add some randomness to sales data
       const randomFactor = 0.8 + Math.random() * 0.4;
       const sales = Math.round(baseSales[timeRange] / labels.length * randomFactor);
       
@@ -45,15 +44,12 @@ const SalesChart = () => {
     });
   }, [timeRange]);
 
-  // Use useMemo instead of useState + useEffect
   const chartData = useMemo(() => generateChartData(), [generateChartData]);
 
   const maxSales = Math.max(...chartData.map(d => d.sales));
   const totalSales = chartData.reduce((sum, data) => sum + data.sales, 0);
   const totalOrders = chartData.reduce((sum, data) => sum + data.orders, 0);
   const avgOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
-  
-  // Calculate growth percentage (mock calculation)
   const growthPercentage = 15.3;
 
   const getBarColor = (sales) => {
@@ -104,23 +100,23 @@ const SalesChart = () => {
   ], [totalSales, totalOrders, avgOrderValue, growthPercentage]);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-      {/* Header */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">Sales Overview</h2>
-            <p className="text-gray-600 mt-1">Track your sales performance</p>
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+      {/* Header - Responsive */}
+      <div className="p-4 sm:p-6 border-b border-gray-200">
+        <div className="flex flex-col lg:flex-row justify-between items-start gap-4">
+          <div className="space-y-1">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800">Sales Overview</h2>
+            <p className="text-sm sm:text-base text-gray-600">Track your sales performance</p>
           </div>
           
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             {/* Time Range Selector */}
-            <div className="inline-flex rounded-lg border border-gray-200 p-1">
+            <div className="inline-flex rounded-lg border border-gray-200 p-1 overflow-x-auto">
               {Object.entries(timeRanges).map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => setTimeRange(key)}
-                  className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                  className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-md transition-colors whitespace-nowrap ${
                     timeRange === key
                       ? 'bg-blue-600 text-white'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
@@ -136,7 +132,7 @@ const SalesChart = () => {
             <div className="inline-flex rounded-lg border border-gray-200 p-1">
               <button
                 onClick={() => setChartType('bar')}
-                className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-md transition-colors ${
                   chartType === 'bar'
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
@@ -147,7 +143,7 @@ const SalesChart = () => {
               </button>
               <button
                 onClick={() => setChartType('line')}
-                className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                className={`px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium rounded-md transition-colors ${
                   chartType === 'line'
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
@@ -160,7 +156,7 @@ const SalesChart = () => {
 
             {/* Export Button */}
             <button 
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+              className="px-3 sm:px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors text-xs sm:text-sm"
               type="button"
             >
               Export Data
@@ -169,80 +165,85 @@ const SalesChart = () => {
         </div>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-6 border-b border-gray-200">
-        {stats.map((stat) => (
-          <div 
-            key={stat.id} 
-            className={`${stat.color} p-4 rounded-xl border transition-transform hover:scale-105`}
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm text-gray-600">{stat.label}</p>
-                <h3 className={`text-2xl font-bold ${stat.textColor} mt-2`}>
-                  {stat.value}
-                </h3>
+      {/* Stats Overview - Responsive Grid */}
+      <div className="p-4 sm:p-6 border-b border-gray-200">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {stats.map((stat) => (
+            <div 
+              key={stat.id} 
+              className={`${stat.color} p-3 sm:p-4 rounded-xl border border-gray-100 transition-all hover:shadow-md`}
+            >
+              <div className="flex justify-between items-start">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-gray-600 truncate">{stat.label}</p>
+                  <h3 className={`text-lg sm:text-xl lg:text-2xl font-bold ${stat.textColor} mt-1 sm:mt-2 truncate`}>
+                    {stat.value}
+                  </h3>
+                </div>
+                <div className="bg-white/50 p-1.5 sm:p-2 rounded-lg shrink-0 ml-2">
+                  {stat.icon}
+                </div>
               </div>
-              <div className="bg-white/50 p-2 rounded-lg">
-                {stat.icon}
+              <div className="flex items-center mt-2 sm:mt-4">
+                <span className={`text-xs font-medium px-1.5 sm:px-2 py-0.5 sm:py-1 rounded ${
+                  stat.change.startsWith('+') 
+                    ? 'bg-green-100 text-green-600' 
+                    : 'bg-red-100 text-red-600'
+                }`}>
+                  {stat.change.startsWith('+') ? 
+                    <TrendingUp size={10} className="inline mr-1" /> : 
+                    <TrendingDown size={10} className="inline mr-1" />}
+                  {stat.change}
+                </span>
+                <span className="text-xs text-gray-500 ml-1.5 truncate">from last</span>
               </div>
             </div>
-            <div className="flex items-center mt-4">
-              <span className={`text-xs font-medium px-2 py-1 rounded ${
-                stat.change.startsWith('+') 
-                  ? 'bg-green-100 text-green-600' 
-                  : 'bg-red-100 text-red-600'
-              }`}>
-                {stat.change.startsWith('+') ? <TrendingUp size={12} className="inline mr-1" /> : <TrendingDown size={12} className="inline mr-1" />}
-                {stat.change}
-              </span>
-              <span className="text-xs text-gray-500 ml-2">from last period</span>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* Chart Area */}
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {/* Y-axis labels and chart */}
-        <div className="relative h-64">
+        <div className="relative h-48 sm:h-56 lg:h-64">
           {/* Y-axis grid lines and labels */}
-          <div className="absolute left-0 top-0 bottom-0 w-12 flex flex-col justify-between text-xs text-gray-500">
+          <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-10 lg:w-12 flex flex-col justify-between">
             {[100, 75, 50, 25, 0].map((percent) => (
               <div key={`y-axis-${percent}`} className="relative">
-                <span>${Math.round(maxSales * percent / 100).toLocaleString()}</span>
+                <span className="text-xs sm:text-sm text-gray-500">
+                  ${Math.round(maxSales * percent / 100).toLocaleString()}
+                </span>
                 <div className="absolute right-0 top-1/2 w-full border-t border-gray-100 -translate-y-1/2"></div>
               </div>
             ))}
           </div>
 
           {/* Chart bars */}
-          <div className="ml-12 h-full flex items-end space-x-2 lg:space-x-4">
+          <div className="ml-8 sm:ml-10 lg:ml-12 h-full flex items-end space-x-1 sm:space-x-2 lg:space-x-4">
             {chartData.map((data) => {
               const height = (data.sales / maxSales) * 100;
               const isHovered = hoveredBar === data.id;
               
               return (
                 <div 
-                key={data.id}
-                className="flex-1 flex flex-col items-center group"
-                role="button"
-                tabIndex={0}
-                onMouseEnter={() => setHoveredBar(data.id)}
-                onMouseLeave={() => setHoveredBar(null)}
-                onFocus={() => setHoveredBar(data.id)}
-                onBlur={() => setHoveredBar(null)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    setHoveredBar(data.id);
-                    // You could add additional functionality here if needed
-                  }
-                }}
-                aria-label={`View details for ${data.label}: $${data.sales.toLocaleString()} in sales, ${data.orders} orders, ${data.customers} customers`}
-              >
+                  key={data.id}
+                  className="flex-1 flex flex-col items-center group"
+                  role="button"
+                  tabIndex={0}
+                  onMouseEnter={() => setHoveredBar(data.id)}
+                  onMouseLeave={() => setHoveredBar(null)}
+                  onFocus={() => setHoveredBar(data.id)}
+                  onBlur={() => setHoveredBar(null)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      setHoveredBar(data.id);
+                    }
+                  }}
+                  aria-label={`View details for ${data.label}: $${data.sales.toLocaleString()} in sales, ${data.orders} orders, ${data.customers} customers`}
+                >
                   {/* Tooltip on hover */}
                   {isHovered && (
-                    <div className="absolute bottom-full mb-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg z-10">
+                    <div className="absolute bottom-full mb-2 px-2 sm:px-3 py-1.5 sm:py-2 bg-gray-900 text-white text-xs sm:text-sm rounded-lg shadow-lg z-50 max-w-[160px]">
                       <div className="font-medium">${data.sales.toLocaleString()}</div>
                       <div className="text-gray-300 text-xs">
                         {data.orders} orders • {data.customers} customers
@@ -258,14 +259,13 @@ const SalesChart = () => {
                       }`}
                       style={{ height: `${height}%` }}
                     >
-                      {/* Animated shimmer effect on hover */}
                       {isHovered && (
                         <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent animate-pulse"></div>
                       )}
                     </div>
                     
                     {/* Value label on bar */}
-                    <div className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full text-xs font-medium ${
+                    <div className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full text-[10px] sm:text-xs font-medium ${
                       height < 20 ? 'text-gray-700 -translate-y-1' : 'text-white'
                     }`}>
                       ${Math.round(data.sales / 1000)}k
@@ -273,18 +273,18 @@ const SalesChart = () => {
                   </div>
 
                   {/* X-axis label */}
-                  <div className="mt-2 text-xs text-gray-600 font-medium">
+                  <div className="mt-2 text-xs text-gray-600 font-medium truncate w-full text-center">
                     {data.label}
                   </div>
                   
-                  {/* Additional metrics below label */}
-                  <div className="mt-1 text-xs text-gray-400 space-y-0.5">
+                  {/* Additional metrics below label - Hide on very small screens */}
+                  <div className="mt-1 text-[10px] sm:text-xs text-gray-400 space-y-0.5 hidden sm:block">
                     <div className="flex items-center justify-center">
-                      <ShoppingBag size={10} className="mr-1" />
+                      <ShoppingBag size={8} className="mr-1" />
                       <span>{data.orders} orders</span>
                     </div>
                     <div className="flex items-center justify-center">
-                      <Users size={10} className="mr-1" />
+                      <Users size={8} className="mr-1" />
                       <span>{data.customers} customers</span>
                     </div>
                   </div>
@@ -295,56 +295,56 @@ const SalesChart = () => {
         </div>
 
         {/* Chart Legend */}
-        <div className="mt-8 flex flex-wrap justify-center gap-4">
+        <div className="mt-6 sm:mt-8 flex flex-wrap justify-center gap-3 sm:gap-4">
           <div className="flex items-center">
-            <div className="w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded mr-2"></div>
-            <span className="text-sm text-gray-600">Low Sales</span>
+            <div className="w-2 sm:w-3 h-2 sm:h-3 bg-gradient-to-r from-blue-400 to-cyan-400 rounded mr-1 sm:mr-2"></div>
+            <span className="text-xs sm:text-sm text-gray-600">Low</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-teal-500 rounded mr-2"></div>
-            <span className="text-sm text-gray-600">Medium Sales</span>
+            <div className="w-2 sm:w-3 h-2 sm:h-3 bg-gradient-to-r from-green-500 to-teal-500 rounded mr-1 sm:mr-2"></div>
+            <span className="text-xs sm:text-sm text-gray-600">Medium</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded mr-2"></div>
-            <span className="text-sm text-gray-600">High Sales</span>
+            <div className="w-2 sm:w-3 h-2 sm:h-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded mr-1 sm:mr-2"></div>
+            <span className="text-xs sm:text-sm text-gray-600">High</span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded mr-2"></div>
-            <span className="text-sm text-gray-600">Peak Sales</span>
+            <div className="w-2 sm:w-3 h-2 sm:h-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded mr-1 sm:mr-2"></div>
+            <span className="text-xs sm:text-sm text-gray-600">Peak</span>
           </div>
         </div>
 
         {/* Time Range Summary */}
-        <div className="mt-8 pt-6 border-t border-gray-200">
-          <div className="flex flex-col sm:flex-row justify-between items-center">
-            <div className="text-center sm:text-left mb-4 sm:mb-0">
-              <p className="text-gray-600">
-                Showing data for <span className="font-bold">{timeRanges[timeRange].toLowerCase()}</span>
+        <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="text-center sm:text-left">
+              <p className="text-sm text-gray-600">
+                Showing data for <span className="font-medium">{timeRanges[timeRange].toLowerCase()}</span>
               </p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs sm:text-sm text-gray-500 mt-1">
                 {growthPercentage > 0 ? (
                   <span className="text-green-600">
-                    <TrendingUp size={14} className="inline mr-1" />
+                    <TrendingUp size={12} className="inline mr-1" />
                     {growthPercentage}% growth from previous period
                   </span>
                 ) : (
                   <span className="text-red-600">
-                    <TrendingDown size={14} className="inline mr-1" />
+                    <TrendingDown size={12} className="inline mr-1" />
                     {Math.abs(growthPercentage)}% decline from previous period
                   </span>
                 )}
               </p>
             </div>
             
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-2">
               <button 
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors"
+                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors text-xs sm:text-sm"
                 type="button"
               >
                 Detailed Report
               </button>
               <button 
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                className="px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors text-xs sm:text-sm"
                 type="button"
               >
                 Compare Periods

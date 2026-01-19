@@ -2,18 +2,20 @@
 import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from './context/AuthProvider';
-import  CartProvider  from './context/CartProvider';
+import CartProvider from './context/CartProvider';
+import { Toaster } from 'react-hot-toast';
 import AppRoutes from './routes/AppRoutes';
 
 function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <Router>
+    <Router>
+      <AuthProvider>
+        <CartProvider>
+          <Toaster position="top-right" />
           <AppRoutes />
-        </Router>
-      </CartProvider>
-    </AuthProvider>
+        </CartProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

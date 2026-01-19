@@ -146,7 +146,7 @@ const SellerDashboardPage = () => {
             </svg>
             Add New Product
           </button>
-          
+
           <Link
             to="/seller/products"
             className="bg-white hover:bg-gray-50 border border-gray-300 text-gray-800 p-4 rounded-lg flex items-center justify-center transition-colors"
@@ -156,7 +156,7 @@ const SellerDashboardPage = () => {
             </svg>
             Manage Products
           </Link>
-          
+
           <Link
             to="/seller/orders"
             className="bg-white hover:bg-gray-50 border border-gray-300 text-gray-800 p-4 rounded-lg flex items-center justify-center transition-colors"
@@ -166,15 +166,25 @@ const SellerDashboardPage = () => {
             </svg>
             View Orders
           </Link>
-          
+
           <Link
             to="/seller/analytics"
-            className="bg-white hover:bg-gray-50 border border-gray-300 text-gray-800 p-4 rounded-lg flex items-center justify-center transition-colors"
+            className="bg-white hover:bg-gray-50 border border-gray-300 text-gray-800 p-4 rounded-lg flex items-center justify-center transition-colors shadow-sm"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
             Analytics
+          </Link>
+
+          <Link
+            to="/seller/categories"
+            className="bg-white hover:bg-emerald-50 border border-emerald-200 text-emerald-700 p-4 rounded-lg flex items-center justify-center transition-colors shadow-sm"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+            </svg>
+            Manage Categories
           </Link>
         </div>
       </div>
@@ -189,7 +199,7 @@ const SellerDashboardPage = () => {
               View All →
             </Link>
           </div>
-          
+
           <div className="space-y-4">
             {recentProducts.map(product => (
               <div key={product.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
@@ -216,7 +226,7 @@ const SellerDashboardPage = () => {
               View All →
             </Link>
           </div>
-          
+
           <div className="space-y-4">
             {recentOrders.map(order => (
               <div key={order.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
@@ -257,7 +267,7 @@ const SellerDashboardPage = () => {
 
       {/* Footer Note */}
       <div className="mt-8 text-center text-gray-500 text-sm">
-        <p>Last updated: Today at {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+        <p>Last updated: Today at {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
         <p className="mt-2">Need help? Contact <a href="mailto:support@marketplace.com" className="text-blue-600 hover:underline">seller support</a></p>
       </div>
     </div>

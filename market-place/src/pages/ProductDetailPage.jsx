@@ -1,15 +1,16 @@
-﻿// src/pages/ProductDetailPage.jsx
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+﻿import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/useCart';
 import { ShoppingCart, Heart, Share2, Star } from 'lucide-react';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import productService from '../services/productService';
+import { toast } from 'react-hot-toast';
 
 const ProductDetailPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
   const { addToCart, cartItems } = useCart();
-  
+
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -22,41 +23,26 @@ const ProductDetailPage = () => {
     const fetchProduct = async () => {
       setLoading(true);
       try {
-        // Mock API call - replace with actual API
-        const mockProduct = {
-          id: productId,
-          name: 'Premium Wireless Headphones',
-          description: 'Experience premium sound quality with our noise-cancelling wireless headphones. Features include 30-hour battery life, Bluetooth 5.0, and comfortable over-ear design.',
-          price: 199.99,
-          originalPrice: 249.99,
-          category: 'Electronics',
-          images: [
-            'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1484704849700-f032a568e944?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1583394838336-acd977736f90?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80',
-          ],
-          stock: 15,
-          rating: 4.5,
-          reviewCount: 128,
-          features: [
-            { id: 'feat-1', text: 'Active Noise Cancellation' },
-            { id: 'feat-2', text: '30-hour battery life' },
-            { id: 'feat-3', text: 'Bluetooth 5.0' },
-            { id: 'feat-4', text: 'Built-in microphone' },
-            { id: 'feat-5', text: 'Foldable design' },
-            { id: 'feat-6', text: 'Carrying case included' }
-          ],
-          specifications: {
-            brand: 'AudioTech',
-            color: 'Matte Black',
-            connectivity: 'Bluetooth 5.0',
-            battery: '30 hours',
-            weight: '250g'
+        const data = await productService.getProductById(productId);
+
+        // Ensure image is an array (DB might have it as a single string)
+        const productData = {
+          ...data,
+          images: Array.isArray(data.image_url)
+            ? data.image_url
+            : data.image_url
+              ? [data.image_url]
+              : ['https://via.placeholder.com/800x600?text=No+Image'],
+          category: data.category_name || data.category || 'General',
+          // Mock some extra fields if they don't exist in DB yet
+          features: data.features || [],
+          specifications: data.specifications || {
+            condition: 'New',
+            delivery: 'Available'
           }
         };
-        
-        await new Promise(resolve => setTimeout(resolve, 500)); // Simulate loading
-        setProduct(mockProduct);
+
+        setProduct(productData);
       } catch (err) {
         setError('Failed to load product');
         console.error('Error fetching product:', err);
@@ -70,7 +56,7 @@ const ProductDetailPage = () => {
 
   const handleAddToCart = () => {
     if (!product) return;
-    
+
     addToCart({
       id: product.id,
       name: product.name,
@@ -78,9 +64,9 @@ const ProductDetailPage = () => {
       image: product.images[0],
       quantity: quantity
     });
-    
+
     // Optional: Show success message
-    alert(`Added ${quantity} × ${product.name} to cart!`);
+    toast.success(`Added ${quantity} × ${product.name} to cart!`);
   };
 
   const handleWishlist = () => {
@@ -129,7 +115,7 @@ const ProductDetailPage = () => {
   // Helper function to get delivery estimate
   const getDeliveryEstimate = () => {
     if (!product) return '';
-    
+
     if (product.stock > 20) {
       return '1-2 business days';
     }
@@ -261,11 +247,10 @@ const ProductDetailPage = () => {
                 <button
                   key={getImageKey(imgIndex)}
                   onClick={() => setSelectedImage(imgIndex)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${
-                    selectedImage === imgIndex 
-                      ? 'border-blue-500 ring-2 ring-blue-200' 
-                      : 'border-gray-200'
-                  }`}
+                  className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 ${selectedImage === imgIndex
+                    ? 'border-blue-500 ring-2 ring-blue-200'
+                    : 'border-gray-200'
+                    }`}
                 >
                   <img
                     src={img}
@@ -284,7 +269,7 @@ const ProductDetailPage = () => {
               <span className="px-3 py-1 text-sm font-semibold text-blue-600 bg-blue-100 rounded-full">
                 {product.category}
               </span>
-              
+
               {/* Action Buttons */}
               <div className="flex space-x-2">
                 <button
@@ -292,9 +277,9 @@ const ProductDetailPage = () => {
                   className="p-2 rounded-full hover:bg-gray-100"
                   aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
                 >
-                  <Heart 
-                    size={24} 
-                    className={isWishlisted ? "text-red-500 fill-red-500" : "text-gray-600"} 
+                  <Heart
+                    size={24}
+                    className={isWishlisted ? "text-red-500 fill-red-500" : "text-gray-600"}
                   />
                 </button>
                 <button
@@ -319,11 +304,10 @@ const ProductDetailPage = () => {
                   <Star
                     key={getStarKey(starIndex)}
                     size={20}
-                    className={`${
-                      starIndex < Math.floor(product.rating) 
-                        ? 'text-yellow-400 fill-yellow-400' 
-                        : 'text-gray-300'
-                    }`}
+                    className={`${starIndex < Math.floor(product.rating)
+                      ? 'text-yellow-400 fill-yellow-400'
+                      : 'text-gray-300'
+                      }`}
                   />
                 ))}
               </div>
@@ -417,7 +401,7 @@ const ProductDetailPage = () => {
                 <ShoppingCart size={22} />
                 {getAddToCartButtonText()}
               </button>
-              
+
               <button
                 onClick={() => {
                   if (product.stock > 0) {
@@ -426,11 +410,10 @@ const ProductDetailPage = () => {
                   }
                 }}
                 disabled={product.stock <= 0}
-                className={`flex-1 py-4 px-6 rounded-lg font-semibold transition-colors ${
-                  product.stock <= 0
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white'
-                }`}
+                className={`flex-1 py-4 px-6 rounded-lg font-semibold transition-colors ${product.stock <= 0
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white'
+                  }`}
               >
                 Buy Now
               </button>
@@ -438,7 +421,7 @@ const ProductDetailPage = () => {
 
             {/* Features */}
             {product.features && product.features.length > 0 && (
-              <div className="mt-8">
+              <div className="mt-8 pb-8 border-b border-gray-100">
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">Key Features</h3>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {product.features.map(feature => (
@@ -450,6 +433,38 @@ const ProductDetailPage = () => {
                 </ul>
               </div>
             )}
+
+            {/* Seller Information */}
+            <div className="mt-8 p-6 bg-blue-50/50 rounded-2xl border border-blue-100">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 bg-white rounded-xl shadow-sm flex items-center justify-center overflow-hidden border border-blue-50">
+                    <img
+                      src={`https://ui-avatars.com/api/?name=${product.seller_name || 'Market'}&background=random`}
+                      alt="Seller"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-black text-gray-400 uppercase tracking-widest">Sold By</h4>
+                    <p className="text-lg font-black text-gray-900">{product.seller_name || 'Premium Seller'}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="flex items-center gap-1 text-yellow-500 font-bold">
+                    <Star size={14} fill="currentColor" />
+                    <span>4.9</span>
+                  </div>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase">Top Rated</p>
+                </div>
+              </div>
+              <Link
+                to={`/store/${(product.seller_name || 'premium-seller').toLowerCase().replace(/\s+/g, '-')}`}
+                className="w-full py-3 bg-white text-blue-600 font-black rounded-xl text-center border border-blue-200 hover:bg-blue-600 hover:text-white transition-all block focus:ring-4 focus:ring-blue-100 outline-none"
+              >
+                Visit Storefront
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -460,8 +475,8 @@ const ProductDetailPage = () => {
             <div className="bg-white rounded-xl shadow-sm overflow-hidden">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
                 {Object.entries(product.specifications).map(([key, value]) => (
-                  <div 
-                    key={getSpecKey(key)} 
+                  <div
+                    key={getSpecKey(key)}
                     className="flex items-center px-6 py-4 border-b border-gray-100 even:bg-gray-50"
                   >
                     <span className="w-1/3 font-medium text-gray-700 capitalize">
