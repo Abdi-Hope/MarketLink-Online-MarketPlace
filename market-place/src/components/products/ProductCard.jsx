@@ -126,9 +126,10 @@ const ProductCard = ({ product }) => {
             NEW
           </span>
         )}
-        {product.discount && (
+        {/* Discount Badge */}
+        {(Number(product.discount) > 0 || (product.originalPrice && product.price && product.originalPrice > product.price)) && (
           <span className="absolute top-3 right-3 z-10 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">
-            -{product.discount}%
+            -{product.discount ? Math.round(Number(product.discount)) : Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}%
           </span>
         )}
 
