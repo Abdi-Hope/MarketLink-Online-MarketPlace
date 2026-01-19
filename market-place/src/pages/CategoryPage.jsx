@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import productService from '../services/productService';
 import { useParams, useLocation } from 'react-router-dom';
 import ProductGrid from '../components/products/ProductGrid';
 import ProductFilters from '../components/products/ProductFilters';
@@ -32,21 +33,98 @@ const CategoryPage = () => {
   const [categoryInfo, setCategoryInfo] = useState(null);
 
   // Fetch category info and products
+
+  // Fetch category info and products
   useEffect(() => {
     const fetchCategoryData = async () => {
       setLoading(true);
       try {
-        // Fetch category information
-        const categoryData = await fetchCategoryInfo(categoryId);
-        setCategoryInfo(categoryData);
+        // 1. Fetch all categories to find the current one
+        const allCategories = await productService.getCategories();
 
-        // Fetch products for this category
-        const productsData = await fetchProductsByCategory(categoryId, filters);
-        setProducts(productsData);
+        // Find the specific category object based on URL param (ID or Name/Slug)
+        // Check loosely for ID match (string vs number) or name/slug match
+        const foundCategory = allCategories.find(c =>
+          String(c.id) === String(categoryId) ||
+          (c.slug && c.slug === categoryId) ||
+          (c.name && c.name.toLowerCase() === String(categoryId).toLowerCase())
+        );
 
-        // Fetch sub-categories if any
-        const subCategories = await fetchSubCategories(categoryId);
-        setCategories(subCategories);
+        const currentCategoryInfo = foundCategory || {
+          id: categoryId,
+          name: typeof categoryId === 'string' && isNaN(categoryId) ? categoryId : `Category ${categoryId}`,
+          description: 'Explore our products'
+        };
+
+        setCategoryInfo(currentCategoryInfo);
+
+        // 2. Fetch products
+        const allProducts = await productService.getProducts();
+
+        // 3. Filter products based on the FOUND category info
+        // We match against ID or Name from the category we just found
+        let filteredProducts = allProducts.filter(product => {
+          // Check ID match
+          if (product.category_id && String(product.category_id) === String(currentCategoryInfo.id)) {
+            return true;
+          }
+          // Check Name match (product.category usually holds the name in some schemas)
+          if (product.category) {
+            return String(product.category).toLowerCase() === String(currentCategoryInfo.name).toLowerCase();
+          }
+          // Fallback: Check if product.category_name exists
+          if (product.category_name) {
+            return String(product.category_name).toLowerCase() === String(currentCategoryInfo.name).toLowerCase();
+          }
+          // Fallback: Check if product.category equals the URL param directly (legacy)
+          return String(product.category).toLowerCase() === String(categoryId).toLowerCase();
+        });
+
+        // 4. Sub-category filter
+        if (filters.subCategory) {
+          filteredProducts = filteredProducts.filter(p =>
+            (p.subCategory || '').toLowerCase() === filters.subCategory.toLowerCase()
+          );
+        }
+
+        // 5. Apply additional filters (price, stock, rating)
+        if (filters.minPrice) {
+          filteredProducts = filteredProducts.filter(p => p.price >= Number.parseFloat(filters.minPrice));
+        }
+        if (filters.maxPrice) {
+          filteredProducts = filteredProducts.filter(p => p.price <= Number.parseFloat(filters.maxPrice));
+        }
+        if (filters.inStock) {
+          filteredProducts = filteredProducts.filter(p => (p.stock || 0) > 0);
+        }
+        if (filters.rating > 0) {
+          filteredProducts = filteredProducts.filter(p => (p.rating || 0) >= filters.rating);
+        }
+
+        // 6. Apply sorting
+        switch (filters.sortBy) {
+          case 'price-low':
+            filteredProducts.sort((a, b) => a.price - b.price);
+            break;
+          case 'price-high':
+            filteredProducts.sort((a, b) => b.price - a.price);
+            break;
+          case 'rating':
+            filteredProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            break;
+          case 'newest':
+          default:
+            filteredProducts.sort((a, b) => b.id - a.id);
+            break;
+        }
+
+        setProducts(filteredProducts);
+
+        // Fetch sub-categories if any (keep mock for now or use real logical if available)
+        // const subCategories = await fetchSubCategories(categoryId);
+        // setCategories(subCategories);
+        setCategories([]); // Clearing subcategories for now as we focus on main fix
+
       } catch (error) {
         console.error('Error fetching category data:', error);
       } finally {
@@ -58,128 +136,6 @@ const CategoryPage = () => {
       fetchCategoryData();
     }
   }, [categoryId, filters]);
-
-  // Mock API functions (replace with actual API calls)
-  const fetchCategoryInfo = async (id) => {
-    // Replace with actual API call
-    const mockCategories = {
-      'electronics': { id: 'electronics', name: 'Electronics', description: 'Latest gadgets and electronics' },
-      'fashion': { id: 'fashion', name: 'Fashion', description: 'Clothing and accessories' },
-      'home': { id: 'home', name: 'Home & Kitchen', description: 'Home decor and kitchen items' },
-      'sports': { id: 'sports', name: 'Sports & Outdoors', description: 'Sports equipment and outdoor gear' },
-      'books': { id: 'books', name: 'Books', description: 'Books and educational materials' },
-    };
-    return mockCategories[id] || { id, name: id.charAt(0).toUpperCase() + id.slice(1), description: `Products in ${id} category` };
-  };
-
-  const fetchProductsByCategory = async (categoryId, filters) => {
-    // Replace with actual API call
-    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-
-    const mockProducts = [
-      {
-        id: 1,
-        name: 'Wireless Bluetooth Headphones',
-        price: 89.99,
-        originalPrice: 129.99,
-        image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-        category: 'Electronics',
-        subCategory: 'Audio',
-        rating: 4.5,
-        reviewCount: 128,
-        stock: 15,
-        isNew: true,
-        discount: 30
-      },
-      {
-        id: 2,
-        name: 'Smart Watch Series 5',
-        price: 299.99,
-        originalPrice: 399.99,
-        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-        category: 'Electronics',
-        subCategory: 'Smartphones',
-        rating: 4.7,
-        reviewCount: 89,
-        stock: 8,
-        isNew: false,
-        discount: 25
-      },
-      {
-        id: 3,
-        name: 'Laptop Backpack',
-        price: 49.99,
-        originalPrice: 69.99,
-        image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-        category: 'Fashion',
-        subCategory: 'Accessories',
-        rating: 4.3,
-        reviewCount: 45,
-        stock: 25,
-        isNew: true,
-        discount: 28
-      },
-      {
-        id: 4,
-        name: 'Coffee Maker',
-        price: 79.99,
-        originalPrice: 99.99,
-        image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
-        category: 'Home',
-        subCategory: 'Kitchen',
-        rating: 4.6,
-        reviewCount: 67,
-        stock: 12,
-        isNew: false,
-        discount: 20
-      }
-    ];
-
-    // Filter by main category
-    let filteredProducts = mockProducts.filter(product =>
-      product.category.toLowerCase() === categoryId?.toLowerCase()
-    );
-
-    // Filter by subcategory if exists
-    if (filters.subCategory) {
-      filteredProducts = filteredProducts.filter(p =>
-        p.subCategory.toLowerCase() === filters.subCategory.toLowerCase()
-      );
-    }
-
-    // Apply additional filters
-    if (filters.minPrice) {
-      filteredProducts = filteredProducts.filter(p => p.price >= Number.parseFloat(filters.minPrice));
-    }
-    if (filters.maxPrice) {
-      filteredProducts = filteredProducts.filter(p => p.price <= Number.parseFloat(filters.maxPrice));
-    }
-    if (filters.inStock) {
-      filteredProducts = filteredProducts.filter(p => p.stock > 0);
-    }
-    if (filters.rating > 0) {
-      filteredProducts = filteredProducts.filter(p => p.rating >= filters.rating);
-    }
-
-    // Apply sorting
-    switch (filters.sortBy) {
-      case 'price-low':
-        filteredProducts.sort((a, b) => a.price - b.price);
-        break;
-      case 'price-high':
-        filteredProducts.sort((a, b) => b.price - a.price);
-        break;
-      case 'rating':
-        filteredProducts.sort((a, b) => b.rating - a.rating);
-        break;
-      case 'newest':
-      default:
-        filteredProducts.sort((a, b) => b.id - a.id);
-        break;
-    }
-
-    return filteredProducts;
-  };
 
   const fetchSubCategories = async (categoryId) => {
     // Replace with actual API call

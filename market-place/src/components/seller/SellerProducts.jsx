@@ -83,7 +83,12 @@ const SellerProducts = () => {
                   <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 flex justify-center">
                       <img
-                        src={product.image_url || 'https://via.placeholder.com/40'}
+                        src={(() => {
+                          const img = product.image_url || product.image;
+                          if (!img) return 'https://via.placeholder.com/40';
+                          if (img.startsWith('http')) return img;
+                          return `http://localhost:5000${img.startsWith('/') ? '' : '/'}${img}`;
+                        })()}
                         alt={product.name}
                         className="w-12 h-12 rounded-lg object-cover"
                       />
@@ -97,8 +102,8 @@ const SellerProducts = () => {
                     <td className="px-6 py-4">
                       <div className="flex justify-center">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${product.stock > 10 ? 'bg-green-100 text-green-700' :
-                            product.stock > 0 ? 'bg-yellow-100 text-yellow-700' :
-                              'bg-red-100 text-red-700'
+                          product.stock > 0 ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-red-100 text-red-700'
                           }`}>
                           {product.stock}
                         </span>

@@ -119,7 +119,12 @@ const SellerCategories = () => {
                             {/* Category Image Header */}
                             <div className="h-40 relative overflow-hidden bg-gray-100">
                                 <img
-                                    src={cat.image_url || 'https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=800'}
+                                    src={(() => {
+                                        const img = cat.image_url;
+                                        if (!img) return 'https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=800';
+                                        if (img.startsWith('http')) return img;
+                                        return `http://localhost:5000${img.startsWith('/') ? '' : '/'}${img}`;
+                                    })()}
                                     alt={cat.name}
                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                 />
