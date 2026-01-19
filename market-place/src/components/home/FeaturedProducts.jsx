@@ -1,11 +1,11 @@
 ﻿import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  Star, 
-  ShoppingBag, 
-  Eye, 
-  Heart, 
-  ChevronLeft, 
+import {
+  Star,
+  ShoppingBag,
+  Eye,
+  Heart,
+  ChevronLeft,
   ChevronRight,
   TrendingUp,
   Loader2
@@ -19,7 +19,7 @@ const FeaturedProducts = () => {
   const [favorites, setFavorites] = useState({});
   const [addingToCart, setAddingToCart] = useState({});
   const [quickViewProduct, setQuickViewProduct] = useState(null);
-  
+
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -97,15 +97,15 @@ const FeaturedProducts = () => {
       navigate('/login');
       return;
     }
-    
+
     setFavorites(prev => ({
       ...prev,
       [productId]: !prev[productId]
     }));
-    
+
     toast.success(
-      favorites[productId] 
-        ? 'Removed from favorites' 
+      favorites[productId]
+        ? 'Removed from favorites'
         : 'Added to favorites!'
     );
   };
@@ -118,7 +118,7 @@ const FeaturedProducts = () => {
     }
 
     setAddingToCart(prev => ({ ...prev, [product.id]: true }));
-    
+
     try {
       await addToCart({
         id: product.id,
@@ -127,7 +127,7 @@ const FeaturedProducts = () => {
         image: product.image,
         quantity: 1
       });
-      
+
       toast.success(`${product.name} added to cart!`);
     } catch (error) {
       console.error('Error adding to cart:', error);
@@ -160,7 +160,7 @@ const FeaturedProducts = () => {
         icon: <ShoppingBag size={16} className="mr-1 sm:mr-2" />
       };
     }
-    
+
     if (addingToCart[product.id]) {
       return {
         text: 'Adding...',
@@ -169,7 +169,7 @@ const FeaturedProducts = () => {
         icon: <Loader2 size={16} className="mr-1 sm:mr-2 animate-spin" />
       };
     }
-    
+
     return {
       text: `Add to Cart - $${product.price.toFixed(2)}`,
       bgColor: 'bg-gradient-to-r from-blue-500 to-purple-500',
@@ -199,14 +199,14 @@ const FeaturedProducts = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-8 md:mb-12">
           {products.map((product) => {
             const buttonState = getButtonState(product);
-            
+
             return (
-              <div 
+              <div
                 key={product.id}
                 className="bg-white rounded-xl sm:rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group flex flex-col"
               >
                 {/* Product Image */}
-                <div 
+                <div
                   className="relative overflow-hidden cursor-pointer flex-grow"
                   onClick={() => handleProductClick(product.id)}
                   role="button"
@@ -218,23 +218,22 @@ const FeaturedProducts = () => {
                     }
                   }}
                 >
-                  <img 
-                    src={product.image} 
+                  <img
+                    src={product.image}
                     alt={product.name}
                     className="w-full h-48 sm:h-56 md:h-64 object-cover group-hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                   />
-                  
+
                   {/* Tags */}
                   <div className="absolute top-3 sm:top-4 left-3 sm:left-4 flex flex-col gap-1 sm:gap-2">
                     {product.tags.map((tag) => (
-                      <span 
+                      <span
                         key={`${product.id}-${tag}`}
-                        className={`px-2 sm:px-3 py-1 text-xs font-semibold rounded-full ${
-                          tag === product.tags[0] 
-                            ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white' 
+                        className={`px-2 sm:px-3 py-1 text-xs font-semibold rounded-full ${tag === product.tags[0]
+                            ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
                             : 'bg-white text-gray-700'
-                        }`}
+                          }`}
                       >
                         {tag}
                       </span>
@@ -250,14 +249,14 @@ const FeaturedProducts = () => {
                     className="absolute top-3 sm:top-4 right-3 sm:right-4 p-1.5 sm:p-2 bg-white rounded-full shadow-md hover:bg-red-50 transition-colors z-10"
                     aria-label={favorites[product.id] ? "Remove from favorites" : "Add to favorites"}
                   >
-                    <Heart 
-                      size={18} 
-                      className={favorites[product.id] ? "text-red-500 fill-red-500" : "text-gray-400"} 
+                    <Heart
+                      size={18}
+                      className={favorites[product.id] ? "text-red-500 fill-red-500" : "text-gray-400"}
                     />
                   </button>
 
                   {/* Quick View Button */}
-                  <button 
+                  <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleQuickView(product);
@@ -297,7 +296,7 @@ const FeaturedProducts = () => {
                     </div>
                   </div>
 
-                  <h3 
+                  <h3
                     className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-2 hover:text-blue-600 cursor-pointer line-clamp-1"
                     onClick={() => handleProductClick(product.id)}
                   >
@@ -341,7 +340,7 @@ const FeaturedProducts = () => {
                           <span>{Math.round((product.stock / 100) * 100)}%</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-1.5">
-                          <div 
+                          <div
                             className="bg-gradient-to-r from-green-400 to-green-600 h-1.5 rounded-full"
                             style={{ width: `${(product.stock / 100) * 100}%` }}
                           ></div>
@@ -364,18 +363,17 @@ const FeaturedProducts = () => {
           >
             <ChevronLeft size={20} className="sm:w-6 sm:h-6 text-gray-700" />
           </button>
-          
+
           {/* Slide Indicators */}
           <div className="flex space-x-1.5 sm:space-x-2">
             {products.map((product, index) => (
               <button
                 key={product.id}
                 onClick={() => setCurrentSlide(index)}
-                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors ${
-                  index === currentSlide 
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-500' 
+                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors ${index === currentSlide
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-500'
                     : 'bg-gray-300'
-                }`}
+                  }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
@@ -392,7 +390,7 @@ const FeaturedProducts = () => {
 
         {/* CTA Section */}
         <div className="mt-12 md:mt-16 text-center">
-          <Link 
+          <Link
             to="/products"
             className="inline-flex items-center px-6 py-3 sm:px-8 sm:py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg sm:rounded-xl hover:opacity-90 transition-all font-bold text-sm sm:text-lg shadow-lg hover:shadow-xl"
           >
@@ -420,11 +418,11 @@ const FeaturedProducts = () => {
                   <ChevronLeft size={24} />
                 </button>
               </div>
-              
+
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
-                  <img 
-                    src={quickViewProduct.image} 
+                  <img
+                    src={quickViewProduct.image}
                     alt={quickViewProduct.name}
                     className="w-full h-auto rounded-lg"
                   />

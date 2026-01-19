@@ -1,8 +1,10 @@
 ﻿import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { LogOut, Bell, User as UserIcon, Settings, ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const UserPanel = ({ user = {}, onLogout, notifications = 0 }) => {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const menuRef = useRef(null);
@@ -22,11 +24,11 @@ const UserPanel = ({ user = {}, onLogout, notifications = 0 }) => {
     const handleDocumentClick = (event) => {
       const isMenuClicked = menuRef.current?.contains(event.target);
       const isNotificationsClicked = notificationsRef.current?.contains(event.target);
-      
+
       if (menuRef.current && !isMenuClicked) {
         setIsMenuOpen(false);
       }
-      
+
       if (notificationsRef.current && !isNotificationsClicked) {
         setIsNotificationsOpen(false);
       }
@@ -71,7 +73,7 @@ const UserPanel = ({ user = {}, onLogout, notifications = 0 }) => {
                 {unreadCount} unread of {notificationItems.length}
               </p>
             </div>
-            
+
             <div className="max-h-64 overflow-y-auto">
               {notificationItems.length > 0 ? (
                 notificationItems.map((item) => (
@@ -88,7 +90,7 @@ const UserPanel = ({ user = {}, onLogout, notifications = 0 }) => {
                     <div className="flex justify-between items-start">
                       <p className="text-sm font-medium text-gray-900">{item.title}</p>
                       {!item.read && (
-                        <span 
+                        <span
                           className="w-2 h-2 bg-blue-500 rounded-full"
                           aria-label="Unread notification"
                         ></span>
@@ -104,7 +106,7 @@ const UserPanel = ({ user = {}, onLogout, notifications = 0 }) => {
                 </div>
               )}
             </div>
-            
+
             <div className="px-4 py-2 border-t border-gray-100">
               <button
                 className="text-sm text-blue-600 hover:text-blue-800 w-full text-center"
@@ -137,12 +139,12 @@ const UserPanel = ({ user = {}, onLogout, notifications = 0 }) => {
                 e.target.src = `https://ui-avatars.com/api/?name=${user.name || 'User'}&background=3b82f6&color=fff`;
               }}
             />
-            <span 
+            <span
               className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"
               aria-label="Online status"
             ></span>
           </div>
-          
+
           <div className="hidden md:block text-left">
             <p className="text-sm font-medium text-gray-900 truncate max-w-[120px]">
               {user.name || 'User'}
@@ -151,9 +153,9 @@ const UserPanel = ({ user = {}, onLogout, notifications = 0 }) => {
               {user.role || 'User'}
             </p>
           </div>
-          
-          <ChevronDown 
-            size={16} 
+
+          <ChevronDown
+            size={16}
             className={`text-gray-500 transition-transform ${isMenuOpen ? 'rotate-180' : ''}`}
             aria-hidden="true"
           />
@@ -172,7 +174,7 @@ const UserPanel = ({ user = {}, onLogout, notifications = 0 }) => {
             <div className="py-2">
               <button
                 onClick={() => {
-                  console.log('Navigate to profile');
+                  navigate('/dashboard/profile');
                   setIsMenuOpen(false);
                 }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50 transition"
@@ -180,10 +182,10 @@ const UserPanel = ({ user = {}, onLogout, notifications = 0 }) => {
                 <UserIcon size={18} className="text-gray-500" />
                 <span className="text-sm text-gray-700">My Profile</span>
               </button>
-
+              +
               <button
                 onClick={() => {
-                  console.log('Navigate to settings');
+                  navigate('/dashboard/settings');
                   setIsMenuOpen(false);
                 }}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-gray-50 transition"

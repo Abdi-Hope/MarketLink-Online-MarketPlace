@@ -1,6 +1,5 @@
-// src/pages/CategoryPage.jsx
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
 import ProductGrid from '../components/products/ProductGrid';
 import ProductFilters from '../components/products/ProductFilters';
 import CategoryGrid from '../components/home/CategoryGrid';
@@ -8,6 +7,10 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 
 const CategoryPage = () => {
   const { categoryId } = useParams();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const subCategory = queryParams.get('sub');
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [filters, setFilters] = useState({
@@ -15,8 +18,16 @@ const CategoryPage = () => {
     maxPrice: '',
     sortBy: 'newest',
     inStock: false,
-    rating: 0
+    rating: 0,
+    subCategory: subCategory || ''
   });
+
+  // Update filters when URL changes
+  useEffect(() => {
+    if (subCategory) {
+      setFilters(prev => ({ ...prev, subCategory }));
+    }
+  }, [subCategory]);
   const [loading, setLoading] = useState(true);
   const [categoryInfo, setCategoryInfo] = useState(null);
 
@@ -64,7 +75,7 @@ const CategoryPage = () => {
   const fetchProductsByCategory = async (categoryId, filters) => {
     // Replace with actual API call
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate delay
-    
+
     const mockProducts = [
       {
         id: 1,
@@ -73,6 +84,7 @@ const CategoryPage = () => {
         originalPrice: 129.99,
         image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
         category: 'Electronics',
+        subCategory: 'Audio',
         rating: 4.5,
         reviewCount: 128,
         stock: 15,
@@ -86,6 +98,7 @@ const CategoryPage = () => {
         originalPrice: 399.99,
         image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
         category: 'Electronics',
+        subCategory: 'Smartphones',
         rating: 4.7,
         reviewCount: 89,
         stock: 8,
@@ -99,6 +112,7 @@ const CategoryPage = () => {
         originalPrice: 69.99,
         image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
         category: 'Fashion',
+        subCategory: 'Accessories',
         rating: 4.3,
         reviewCount: 45,
         stock: 25,
@@ -112,6 +126,7 @@ const CategoryPage = () => {
         originalPrice: 99.99,
         image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80',
         category: 'Home',
+        subCategory: 'Kitchen',
         rating: 4.6,
         reviewCount: 67,
         stock: 12,
@@ -120,10 +135,17 @@ const CategoryPage = () => {
       }
     ];
 
-    // Filter by category
-    let filteredProducts = mockProducts.filter(product => 
+    // Filter by main category
+    let filteredProducts = mockProducts.filter(product =>
       product.category.toLowerCase() === categoryId?.toLowerCase()
     );
+
+    // Filter by subcategory if exists
+    if (filters.subCategory) {
+      filteredProducts = filteredProducts.filter(p =>
+        p.subCategory.toLowerCase() === filters.subCategory.toLowerCase()
+      );
+    }
 
     // Apply additional filters
     if (filters.minPrice) {
@@ -237,7 +259,7 @@ const CategoryPage = () => {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Filters Sidebar */}
           <div className="lg:w-1/4">
-            <ProductFilters 
+            <ProductFilters
               filters={filters}
               onFilterChange={handleFilterChange}
             />
@@ -268,7 +290,7 @@ const CategoryPage = () => {
             {products.length > 0 ? (
               <>
                 <ProductGrid products={products} />
-                
+
                 {/* Sub-categories if available */}
                 {categories.length > 0 && (
                   <div className="mt-12">

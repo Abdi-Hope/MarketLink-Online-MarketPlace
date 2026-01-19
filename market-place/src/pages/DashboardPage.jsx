@@ -1,6 +1,7 @@
 ﻿import React, { useState } from 'react';
 import { useAuth } from '../context/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 
 // Import components
 import DashboardHeader from '../components/dashboard/DashboardHeader';
@@ -13,8 +14,8 @@ import SalesChart from '../components/dashboard/SalesChart';
 import TopProducts from '../components/dashboard/TopProducts';
 
 // Icons for cards
-import { 
-  User, Settings, ShoppingBag, Heart, Package, 
+import {
+  User, Settings, ShoppingBag, Heart, Package,
   Users, BarChart, Activity, ChevronRight
 } from 'lucide-react';
 
@@ -30,24 +31,28 @@ const DashboardPage = () => {
 
   const handleSearch = (query) => {
     console.log('Searching for:', query);
+    toast.success(`Search results for "${query}"`);
   };
 
   const handleExport = () => {
-    console.log('Exporting data...');
+    toast.loading('Preparing export...', { duration: 1500 });
+    setTimeout(() => {
+      toast.success('Data exported successfully!');
+    }, 1500);
   };
 
   const handleFilter = () => {
-    console.log('Opening filters...');
+    toast.success('Filter options opened');
   };
 
   // Dashboard cards based on user role
   const getDashboardCards = () => {
     const commonCards = [
-      { 
+      {
         id: 'profile',
-        icon: User, 
-        title: 'Profile', 
-        description: 'View and edit your profile', 
+        icon: User,
+        title: 'Profile',
+        description: 'View and edit your profile',
         bgColor: 'bg-gradient-to-br from-blue-50 via-blue-100 to-blue-50',
         borderColor: 'border-blue-200/50',
         textColor: 'text-blue-600',
@@ -57,11 +62,11 @@ const DashboardPage = () => {
         progress: user?.avatar ? 100 : 60,
         trend: 'stable'
       },
-      { 
+      {
         id: 'settings',
-        icon: Settings, 
-        title: 'Settings', 
-        description: 'Account settings', 
+        icon: Settings,
+        title: 'Settings',
+        description: 'Account settings',
         bgColor: 'bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50',
         borderColor: 'border-gray-200/50',
         textColor: 'text-gray-600',
@@ -76,11 +81,11 @@ const DashboardPage = () => {
     if (user?.role === 'user') {
       return [
         ...commonCards,
-        { 
+        {
           id: 'orders',
-          icon: ShoppingBag, 
-          title: 'My Orders', 
-          description: 'Track your orders', 
+          icon: ShoppingBag,
+          title: 'My Orders',
+          description: 'Track your orders',
           bgColor: 'bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-50',
           borderColor: 'border-emerald-200/50',
           textColor: 'text-emerald-600',
@@ -90,11 +95,11 @@ const DashboardPage = () => {
           progress: 65,
           trend: 'up'
         },
-        { 
+        {
           id: 'wishlist',
-          icon: Heart, 
-          title: 'Wishlist', 
-          description: 'View saved items', 
+          icon: Heart,
+          title: 'Wishlist',
+          description: 'View saved items',
           bgColor: 'bg-gradient-to-br from-rose-50 via-rose-100 to-rose-50',
           borderColor: 'border-rose-200/50',
           textColor: 'text-rose-600',
@@ -110,11 +115,11 @@ const DashboardPage = () => {
     if (user?.role === 'seller') {
       return [
         ...commonCards,
-        { 
+        {
           id: 'products',
-          icon: Package, 
-          title: 'Products', 
-          description: 'Manage your products', 
+          icon: Package,
+          title: 'Products',
+          description: 'Manage your products',
           bgColor: 'bg-gradient-to-br from-emerald-50 via-emerald-100 to-emerald-50',
           borderColor: 'border-emerald-200/50',
           textColor: 'text-emerald-600',
@@ -124,11 +129,11 @@ const DashboardPage = () => {
           progress: 85,
           trend: 'up'
         },
-        { 
+        {
           id: 'analytics',
-          icon: Activity, 
-          title: 'Analytics', 
-          description: 'View sales analytics', 
+          icon: Activity,
+          title: 'Analytics',
+          description: 'View sales analytics',
           bgColor: 'bg-gradient-to-br from-amber-50 via-amber-100 to-amber-50',
           borderColor: 'border-amber-200/50',
           textColor: 'text-amber-600',
@@ -144,11 +149,11 @@ const DashboardPage = () => {
     if (user?.role === 'admin') {
       return [
         ...commonCards,
-        { 
+        {
           id: 'users',
-          icon: Users, 
-          title: 'Users', 
-          description: 'Manage all users', 
+          icon: Users,
+          title: 'Users',
+          description: 'Manage all users',
           bgColor: 'bg-gradient-to-br from-red-50 via-red-100 to-red-50',
           borderColor: 'border-red-200/50',
           textColor: 'text-red-600',
@@ -158,11 +163,11 @@ const DashboardPage = () => {
           progress: 90,
           trend: 'up'
         },
-        { 
+        {
           id: 'admin-analytics',
-          icon: BarChart, 
-          title: 'System Analytics', 
-          description: 'Complete system overview', 
+          icon: BarChart,
+          title: 'System Analytics',
+          description: 'Complete system overview',
           bgColor: 'bg-gradient-to-br from-violet-50 via-violet-100 to-violet-50',
           borderColor: 'border-violet-200/50',
           textColor: 'text-violet-600',
@@ -180,18 +185,18 @@ const DashboardPage = () => {
 
   const handleCardClick = (cardId) => {
     console.log(`Clicked ${cardId}`);
-    switch(cardId) {
+    switch (cardId) {
       case 'profile':
-        navigate('/profile');
+        navigate('/dashboard/profile');
         break;
       case 'settings':
-        navigate('/settings');
+        navigate('/dashboard/settings');
         break;
       case 'orders':
-        navigate('/orders');
+        navigate('/dashboard/orders');
         break;
       case 'wishlist':
-        navigate('/wishlist');
+        navigate('/dashboard/wishlist');
         break;
       case 'products':
         navigate('/seller/products');
@@ -215,24 +220,21 @@ const DashboardPage = () => {
       {/* Dashboard Header - Fixed positioning with proper z-index */}
       <div className="relative z-30">
         <DashboardHeader
-          title="Dashboard"
-          subtitle="MarketPlace Analytics"
+          title="Overview"
+          subtitle="Welcome back to your marketplace"
           activeTab={activeTab}
-          onTabChange={setActiveTab}
+          onTabChange={(tabId) => {
+            setActiveTab(tabId);
+            if (tabId === 'overview') navigate('/dashboard');
+            else navigate(`/dashboard/${tabId}`);
+          }}
           onSearch={handleSearch}
-        >
-          <UserPanel
-            user={user}
-            onLogout={handleLogout}
-            onSearch={handleSearch}
-            notifications={3}
-          />
-        </DashboardHeader>
+        />
       </div>
 
       {/* Main content with proper spacing */}
       <main className="relative z-10 max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 pt-20 sm:pt-24 pb-4 sm:pb-6 md:pb-8">
-        
+
         {/* Welcome Banner */}
         <div className="mb-6 sm:mb-8 relative">
           <WelcomeBanner
@@ -258,10 +260,10 @@ const DashboardPage = () => {
 
         {/* Charts and Data Grid - FIXED: Removed extra container for SalesChart */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8 mb-6 sm:mb-8">
-          
+
           {/* Sales Chart - Uses its own container */}
           <SalesChart />
-          
+
           {/* Top Products Card */}
           <div className="relative bg-white rounded-xl sm:rounded-2xl shadow-sm sm:shadow-lg p-4 sm:p-6 hover:shadow-md sm:hover:shadow-xl transition-shadow duration-300 border border-gray-100">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6">
@@ -288,10 +290,16 @@ const DashboardPage = () => {
               <p className="text-xs sm:text-sm text-gray-600">Latest customer activities</p>
             </div>
             <div className="flex gap-2 sm:gap-3 mt-2 sm:mt-0">
-              <button className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+              <button
+                onClick={() => navigate('/dashboard/orders')}
+                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+              >
                 New Order
               </button>
-              <button className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition border border-gray-200">
+              <button
+                onClick={handleExport}
+                className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm bg-gray-50 text-gray-700 rounded-lg hover:bg-gray-100 transition border border-gray-200"
+              >
                 Export
               </button>
             </div>

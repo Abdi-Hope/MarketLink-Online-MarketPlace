@@ -6,17 +6,18 @@ import CartSummary from '../components/cart/CartSummary';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useCart } from '../context/useCart';
 import { useAuth } from '../context/useAuth';
+import { toast } from 'react-hot-toast';
 
 const CartPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { 
-    cartItems, 
-    loading, 
+  const {
+    cartItems,
+    loading,
     error,
-    updateQuantity, 
-    removeItem, 
-    saveForLater, 
+    updateQuantity,
+    removeItem,
+    saveForLater,
     moveToCart,
     clearCart,
     savedItems,
@@ -30,26 +31,26 @@ const CartPage = () => {
   const calculateCartTotals = () => {
     // Ensure cartItems is an array
     const items = Array.isArray(cartItems) ? cartItems : [];
-    
+
     const subtotal = items.reduce((sum, item) => {
       if (!item) return sum;
-      
+
       // Extract price - handle multiple possible formats
       let price = 0;
       const itemPrice = item.price;
-      
+
       if (itemPrice) {
         if (typeof itemPrice === 'object') {
           // Try all common price property names
-          price = itemPrice.value || itemPrice.amount || itemPrice.current || 
-                  itemPrice.regular || itemPrice.price || itemPrice.base || 0;
+          price = itemPrice.value || itemPrice.amount || itemPrice.current ||
+            itemPrice.regular || itemPrice.price || itemPrice.base || 0;
         } else if (typeof itemPrice === 'number') {
           price = itemPrice;
         } else if (typeof itemPrice === 'string') {
           price = Number.parseFloat(itemPrice) || 0;
         }
       }
-      
+
       // Check for sale price (if available)
       if (item.salePrice || item.discountedPrice) {
         const salePrice = item.salePrice || item.discountedPrice;
@@ -62,11 +63,11 @@ const CartPage = () => {
           if (!Number.isNaN(parsed)) price = parsed;
         }
       }
-      
+
       const quantity = Number.parseInt(item.quantity, 10) || 1;
       return sum + (price * quantity);
     }, 0);
-    
+
     const shipping = subtotal >= 50 ? 0 : 5.99; // Free shipping over $50
     const tax = Number.parseFloat((subtotal * 0.08).toFixed(2)); // 8% tax
     const total = Number.parseFloat((subtotal + shipping + tax).toFixed(2));
@@ -74,12 +75,12 @@ const CartPage = () => {
       return sum + (Number.parseInt(item.quantity, 10) || 1);
     }, 0);
 
-    return { 
-      subtotal: Number.parseFloat(subtotal.toFixed(2)), 
-      shipping, 
-      tax, 
-      total, 
-      totalItems 
+    return {
+      subtotal: Number.parseFloat(subtotal.toFixed(2)),
+      shipping,
+      tax,
+      total,
+      totalItems
     };
   };
 
@@ -92,13 +93,13 @@ const CartPage = () => {
       handleRemoveItem(id);
       return;
     }
-    
+
     setLocalLoading(true);
     try {
       await updateQuantity(id, newQuantity);
     } catch (err) {
       console.error('Error updating quantity:', err);
-      alert('Failed to update quantity. Please try again.');
+      toast.error('Failed to update quantity. Please try again.');
     } finally {
       setLocalLoading(false);
     }
@@ -111,7 +112,7 @@ const CartPage = () => {
         await removeItem(id);
       } catch (err) {
         console.error('Error removing item:', err);
-        alert('Failed to remove item. Please try again.');
+        toast.error('Failed to remove item. Please try again.');
       } finally {
         setLocalLoading(false);
       }
@@ -124,7 +125,7 @@ const CartPage = () => {
       await saveForLater(id);
     } catch (err) {
       console.error('Error saving item:', err);
-      alert('Failed to save item. Please try again.');
+      toast.error('Failed to save item. Please try again.');
     } finally {
       setLocalLoading(false);
     }
@@ -147,19 +148,19 @@ const CartPage = () => {
       navigate('/login', { state: { from: '/cart' } });
       return;
     }
-    
+
     if (!cartItems || cartItems.length === 0) {
       alert('Your cart is empty. Add items before checkout.');
       return;
     }
-    
+
     // Check for out of stock items
     const outOfStockItems = cartItems.filter(item => item.inStock === false);
     if (outOfStockItems.length > 0) {
       alert('Please remove out of stock items before proceeding to checkout.');
       return;
     }
-    
+
     navigate('/checkout');
   };
 
@@ -270,7 +271,7 @@ const CartPage = () => {
                     {cartItems.map((item) => {
                       // Get item ID - try multiple possible fields
                       const itemId = item.id || item._id || item.productId;
-                      
+
                       // Prepare item data for CartItem component
                       const cartItemData = {
                         ...item,
@@ -284,7 +285,7 @@ const CartPage = () => {
                         // Ensure we have an image
                         image: item.image || item.images?.[0] || item.imgUrl || '',
                       };
-                      
+
                       return (
                         <CartItem
                           key={itemId}
@@ -307,7 +308,7 @@ const CartPage = () => {
                       >
                         ← Continue Shopping
                       </button>
-                      
+
                       <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                         <button
                           onClick={handleClearCart}
@@ -319,7 +320,7 @@ const CartPage = () => {
                           onClick={() => {
                             // You can implement save cart to localStorage or backend
                             globalThis.localStorage.setItem('savedCart', JSON.stringify(cartItems));
-                            alert('Cart saved! You can retrieve it later.');
+                            toast.success('Cart saved! You can retrieve it later.');
                           }}
                           className="px-6 py-3 border border-blue-300 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors"
                         >
@@ -391,7 +392,7 @@ const CartPage = () => {
 
         {/* Mobile Sidebar Overlay */}
         {isSidebarOpen && (
-          <button 
+          <button
             className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden cursor-pointer"
             onClick={toggleSidebar}
             aria-label="Close sidebar"
@@ -411,21 +412,21 @@ const CartPage = () => {
 // Helper function to extract price from item
 const extractPrice = (item) => {
   if (!item) return 0;
-  
+
   let price = 0;
   const itemPrice = item.price;
-  
+
   if (itemPrice) {
     if (typeof itemPrice === 'object') {
-      price = itemPrice.value || itemPrice.amount || itemPrice.current || 
-              itemPrice.regular || itemPrice.price || itemPrice.base || 0;
+      price = itemPrice.value || itemPrice.amount || itemPrice.current ||
+        itemPrice.regular || itemPrice.price || itemPrice.base || 0;
     } else if (typeof itemPrice === 'number') {
       price = itemPrice;
     } else if (typeof itemPrice === 'string') {
       price = Number.parseFloat(itemPrice) || 0;
     }
   }
-  
+
   // Check for sale price (if available)
   if (item.salePrice || item.discountedPrice) {
     const salePrice = item.salePrice || item.discountedPrice;
@@ -438,7 +439,7 @@ const extractPrice = (item) => {
       if (!Number.isNaN(parsed)) price = parsed;
     }
   }
-  
+
   return price;
 };
 

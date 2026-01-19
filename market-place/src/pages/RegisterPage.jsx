@@ -1,6 +1,8 @@
 ﻿// src/pages/RegisterPage.jsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/useAuth';
+import { toast } from 'react-hot-toast';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -19,6 +21,15 @@ const RegisterPage = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { register, googleLogin } = useAuth();
+
+  const handleSocialLogin = (provider) => {
+    if (provider === 'google') {
+      navigate(`/auth/google?role=${formData.accountType}`);
+    } else {
+      toast.error(`${provider} login is not implemented yet.`);
+    }
+  };
 
   const accountTypes = [
     { id: 'buyer', title: 'Buyer', icon: '🛒', description: 'Shop for products and services' },
@@ -55,67 +66,86 @@ const RegisterPage = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     // Validate required fields
     if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
     if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
-    
+
     // Validate email
     const emailError = validateEmail(formData.email);
     if (emailError) newErrors.email = emailError;
-    
+
     // Validate password
     const passwordError = validatePassword(formData.password);
     if (passwordError) newErrors.password = passwordError;
-    
+
     // Validate password confirmation
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
-    
+
     // Validate terms agreement
     if (!formData.agreeTerms) {
       newErrors.agreeTerms = 'You must agree to the terms and privacy policy';
     }
-    
+
     return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validateForm();
-    
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-    
+
     setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Registration data:', formData);
+
+    try {
+      const userData = {
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        password: formData.password,
+        role: formData.accountType
+      };
+
+      const result = await register(userData);
+
+      if (result.success) {
+        toast.success('Account created successfully! Redirecting to login...');
+        // Optionally redirect or show a success component
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
+      } else {
+        toast.error(result.message || 'Registration failed');
+        setErrors({ submit: result.message });
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
       setIsSubmitting(false);
-      alert('Registration successful! Redirecting to login...');
-      navigate('/login');
-    }, 1500);
+    }
   };
 
   const getPasswordStrengthInfo = (password) => {
     if (!password) return { strength: 0, label: 'None', color: 'bg-gray-200' };
-    
+
     let strength = 0;
     if (password.length >= 8) strength += 25;
     if (/[a-z]/.test(password)) strength += 25;
     if (/[A-Z]/.test(password)) strength += 25;
     if (/\d/.test(password)) strength += 25;
-    
+
     let label = 'Weak';
     let color = 'bg-red-500';
     if (strength >= 50) { label = 'Fair'; color = 'bg-yellow-500'; }
     if (strength >= 75) { label = 'Good'; color = 'bg-blue-500'; }
     if (strength === 100) { label = 'Strong'; color = 'bg-green-500'; }
-    
+
     return { strength, label, color };
   };
 
@@ -169,11 +199,10 @@ const RegisterPage = () => {
                 {accountTypes.map(type => (
                   <label
                     key={type.id}
-                    className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all ${
-                      formData.accountType === type.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-blue-300'
-                    }`}
+                    className={`relative border-2 rounded-xl p-4 cursor-pointer transition-all ${formData.accountType === type.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-blue-300'
+                      }`}
                   >
                     <input
                       type="radio"
@@ -205,9 +234,8 @@ const RegisterPage = () => {
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                      errors.firstName ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${errors.firstName ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     placeholder="Enter your first name"
                   />
                   {errors.firstName && (
@@ -224,9 +252,8 @@ const RegisterPage = () => {
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                      errors.lastName ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${errors.lastName ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     placeholder="Enter your last name"
                   />
                   {errors.lastName && (
@@ -245,9 +272,8 @@ const RegisterPage = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                    errors.email ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${errors.email ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder="Enter your email"
                 />
                 {errors.email && (
@@ -281,9 +307,8 @@ const RegisterPage = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                      errors.password ? 'border-red-500' : 'border-gray-300'
-                    }`}
+                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${errors.password ? 'border-red-500' : 'border-gray-300'
+                      }`}
                     placeholder="Create a strong password"
                   />
                   <button
@@ -298,7 +323,7 @@ const RegisterPage = () => {
                 {errors.password && (
                   <p className="mt-1 text-sm text-red-600">{errors.password}</p>
                 )}
-                
+
                 {/* Password Strength */}
                 {formData.password && (
                   <div className="mt-2">
@@ -331,9 +356,8 @@ const RegisterPage = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                    errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                  }`}
+                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                    }`}
                   placeholder="Confirm your password"
                 />
                 {errors.confirmPassword && (
@@ -349,9 +373,8 @@ const RegisterPage = () => {
                     name="agreeTerms"
                     checked={formData.agreeTerms}
                     onChange={handleChange}
-                    className={`mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 ${
-                      errors.agreeTerms ? 'border-red-500' : ''
-                    }`}
+                    className={`mt-1 h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 ${errors.agreeTerms ? 'border-red-500' : ''
+                      }`}
                   />
                   <div>
                     <span className="text-gray-700">
@@ -389,9 +412,8 @@ const RegisterPage = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all ${
-                  isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
-                }`}
+                className={`w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold rounded-lg hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-all ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+                  }`}
               >
                 {isSubmitting ? (
                   <div className="flex items-center justify-center">
@@ -457,22 +479,62 @@ const RegisterPage = () => {
           </div>
         </div>
 
-        {/* Social Login Options */}
-        <div className="mt-8 text-center">
-          <p className="text-gray-600 mb-4">Or sign up with</p>
-          <div className="flex justify-center space-x-4">
-            {socialLoginButtons.map(button => (
-              <button
-                key={button.id}
-                className="p-3 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                <span className="flex items-center space-x-2">
-                  <span className={`${button.color}`}>{button.icon}</span>
-                  <span className="text-gray-700">{button.label}</span>
-                </span>
-              </button>
-            ))}
+        {/* Premium Social Login Section */}
+        <div className="mt-16 relative">
+          <div className="absolute inset-0 flex items-center" aria-hidden="true">
+            <div className="w-full border-t border-gray-100/50"></div>
           </div>
+          <div className="relative flex justify-center text-sm">
+            <div className="px-8 py-2 bg-white rounded-full border border-gray-100 shadow-sm flex items-center gap-3 group">
+              <div className="w-1 h-1 bg-blue-600 rounded-full animate-pulse"></div>
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                Or join with social account
+              </span>
+              <div className="w-1 h-1 bg-indigo-600 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <button
+            onClick={() => handleSocialLogin('facebook')}
+            className="flex items-center justify-center gap-3 px-6 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:shadow-blue-100 hover:-translate-y-1 transition-all duration-300 group"
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center scale-90 group-hover:scale-100 transition-transform">
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill="#1877F2">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+              </svg>
+            </div>
+            <span className="text-gray-700 font-black text-sm">Facebook</span>
+          </button>
+
+          <button
+            onClick={() => handleSocialLogin('google')}
+            className="flex items-center justify-center gap-3 px-6 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:shadow-red-50 hover:-translate-y-1 transition-all duration-300 group"
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center scale-90 group-hover:scale-100 transition-transform">
+              <svg className="w-6 h-6" viewBox="0 0 48 48">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z" />
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                <path fill="none" d="M0 0h48v48H0z" />
+              </svg>
+            </div>
+            <span className="text-gray-700 font-black text-sm">Google</span>
+          </button>
+
+          <button
+            onClick={() => handleSocialLogin('apple')}
+            className="flex items-center justify-center gap-3 px-6 py-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-xl hover:shadow-gray-200 hover:-translate-y-1 transition-all duration-300 group"
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center scale-90 group-hover:scale-100 transition-transform">
+              <svg className="w-6 h-6" viewBox="0 0 384 512" fill="#000000">
+                <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
+              </svg>
+            </div>
+            <span className="text-gray-700 font-black text-sm">Apple ID</span>
+          </button>
         </div>
       </div>
     </div>

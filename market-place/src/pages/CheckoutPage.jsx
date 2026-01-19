@@ -1,36 +1,22 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useCart } from '../context/useCart';
 import CartItem from '../components/cart/CartItem';
 import CartSummary from '../components/cart/CartSummary';
+import { toast } from 'react-hot-toast';
+import { CheckCircle, ArrowLeft, ShoppingBag, Truck, CreditCard, ShieldCheck } from 'lucide-react';
 
 const CheckoutPage = () => {
-  // Cart state
-  const [cartItems, setCartItems] = useState([
-    { 
-      id: 1, 
-      name: 'Wireless Headphones', 
-      price: 99.99, 
-      quantity: 1, 
-      color: 'Black',
-      image: '/images/headphones.jpg'
-    },
-    { 
-      id: 2, 
-      name: 'Phone Case', 
-      price: 24.99, 
-      quantity: 2, 
-      color: 'Blue',
-      image: '/images/case.jpg'
-    },
-    { 
-      id: 3, 
-      name: 'USB-C Cable', 
-      price: 14.99, 
-      quantity: 1, 
-      color: 'White',
-      image: '/images/cable.jpg'
-    },
-  ]);
+  const { cartItems, updateQuantity, removeFromCart, clearCart, getCartTotal } = useCart();
+  const navigate = useNavigate();
+
+  // Redirect if cart is empty
+  React.useEffect(() => {
+    if (!cartItems || cartItems.length === 0) {
+      toast.error('Your cart is empty');
+      navigate('/products');
+    }
+  }, [cartItems, navigate]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -57,6 +43,7 @@ const CheckoutPage = () => {
   // UI state
   const [activeStep, setActiveStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
   // Shipping methods
@@ -68,7 +55,7 @@ const CheckoutPage = () => {
   ];
 
   // Calculate totals
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = getCartTotal();
   const selectedShipping = shippingMethods.find(m => m.id === formData.shippingMethod)?.price || 0;
   const tax = subtotal * 0.08;
   const total = subtotal + selectedShipping + tax;
@@ -80,7 +67,7 @@ const CheckoutPage = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
-    
+
     if (formErrors[name]) {
       setFormErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -88,19 +75,17 @@ const CheckoutPage = () => {
 
   // Cart item handlers
   const handleQuantityChange = (id, newQuantity) => {
-    setCartItems(prev => prev.map(item => 
-      item.id === id ? { ...item, quantity: Math.max(1, newQuantity) } : item
-    ));
+    updateQuantity(id, newQuantity);
   };
 
   const removeItem = (id) => {
-    setCartItems(prev => prev.filter(item => item.id !== id));
+    removeFromCart(id);
   };
 
   // Validation functions
   const validateShippingStep = () => {
     const errors = {};
-    
+
     if (!formData.firstName.trim()) errors.firstName = 'First name is required';
     if (!formData.lastName.trim()) errors.lastName = 'Last name is required';
     if (!formData.email.trim()) errors.email = 'Email is required';
@@ -109,13 +94,13 @@ const CheckoutPage = () => {
     if (!formData.city.trim()) errors.city = 'City is required';
     if (!formData.state.trim()) errors.state = 'State is required';
     if (!formData.zipCode.trim()) errors.zipCode = 'ZIP code is required';
-    
+
     return errors;
   };
 
   const validatePaymentStep = () => {
     const errors = {};
-    
+
     if (formData.paymentMethod === 'card') {
       if (!formData.cardNumber.trim()) errors.cardNumber = 'Card number is required';
       if (!formData.cardName.trim()) errors.cardName = 'Name on card is required';
@@ -123,14 +108,14 @@ const CheckoutPage = () => {
       if (!formData.cvv.trim()) errors.cvv = 'CVV is required';
     }
     if (!formData.termsAccepted) errors.termsAccepted = 'You must accept the terms';
-    
+
     return errors;
   };
 
   const validateStep = () => {
     let errors = {};
-    
-    switch(activeStep) {
+
+    switch (activeStep) {
       case 1:
         errors = validateShippingStep();
         break;
@@ -140,7 +125,7 @@ const CheckoutPage = () => {
       default:
         break;
     }
-    
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -179,19 +164,27 @@ const CheckoutPage = () => {
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateStep()) {
       return;
     }
 
     setIsSubmitting(true);
-    
+
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    console.log('Order submitted:', { formData, cartItems, total });
-    alert('Order placed successfully! Thank you for your purchase!');
-    setIsSubmitting(false);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      console.log('Order submitted:', { formData, cartItems, total });
+      toast.success('Order placed successfully!');
+
+      clearCart();
+      setIsSuccess(true);
+    } catch (error) {
+      toast.error('Failed to place order. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Steps configuration
@@ -207,14 +200,14 @@ const CheckoutPage = () => {
     <div className="mb-8 md:mb-12">
       <div className="flex items-center justify-between max-w-3xl mx-auto relative">
         <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 -translate-y-1/2"></div>
-        
+
         {steps.map((step) => (
           <div key={step.number} className="relative z-10 flex flex-col items-center">
             <button
               onClick={() => setActiveStep(step.number)}
               className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center border-2 transition-all duration-300 transform hover:scale-110
-                ${step.number <= activeStep 
-                  ? 'bg-blue-600 border-blue-600 text-white shadow-lg' 
+                ${step.number <= activeStep
+                  ? 'bg-blue-600 border-blue-600 text-white shadow-lg'
                   : 'bg-white border-gray-300 text-gray-400 hover:border-blue-400'
                 }`}
             >
@@ -238,7 +231,7 @@ const CheckoutPage = () => {
 
   // Render different steps
   const renderStepContent = () => {
-    switch(activeStep) {
+    switch (activeStep) {
       case 1:
         return renderShippingInfo();
       case 2:
@@ -277,7 +270,7 @@ const CheckoutPage = () => {
             <p className="mt-1 text-sm text-red-600">{formErrors.firstName}</p>
           )}
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             Last Name <span className="text-red-500">*</span>
@@ -369,7 +362,7 @@ const CheckoutPage = () => {
             <p className="mt-1 text-sm text-red-600">{formErrors.city}</p>
           )}
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             State <span className="text-red-500">*</span>
@@ -387,7 +380,7 @@ const CheckoutPage = () => {
             <p className="mt-1 text-sm text-red-600">{formErrors.state}</p>
           )}
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             ZIP Code <span className="text-red-500">*</span>
@@ -412,14 +405,14 @@ const CheckoutPage = () => {
   const renderShippingMethod = () => (
     <div className="p-6 md:p-8 animate-slideIn">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Shipping Method</h2>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {shippingMethods.map((method) => (
           <label
             key={method.id}
             className={`relative flex items-start p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-md
-              ${formData.shippingMethod === method.id 
-                ? 'border-blue-500 bg-blue-50 shadow-sm' 
+              ${formData.shippingMethod === method.id
+                ? 'border-blue-500 bg-blue-50 shadow-sm'
                 : 'border-gray-200 hover:border-blue-300'
               }`}
           >
@@ -464,7 +457,7 @@ const CheckoutPage = () => {
   const renderPaymentDetails = () => (
     <div className="p-6 md:p-8 animate-slideIn">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Details</h2>
-      
+
       {/* Payment Method Selection */}
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Select Payment Method</h3>
@@ -473,8 +466,8 @@ const CheckoutPage = () => {
             <label
               key={method}
               className={`flex items-center justify-center p-4 border-2 rounded-lg cursor-pointer transition-all duration-200
-                ${formData.paymentMethod === method 
-                  ? 'border-blue-500 bg-blue-50' 
+                ${formData.paymentMethod === method
+                  ? 'border-blue-500 bg-blue-50'
                   : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
                 }`}
             >
@@ -539,7 +532,7 @@ const CheckoutPage = () => {
                 <p className="mt-1 text-sm text-red-600">{formErrors.cardName}</p>
               )}
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
@@ -562,7 +555,7 @@ const CheckoutPage = () => {
                   <p className="mt-1 text-sm text-red-600">{formErrors.expiryDate}</p>
                 )}
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   CVV <span className="text-red-500">*</span>
@@ -650,19 +643,20 @@ const CheckoutPage = () => {
   const renderOrderReview = () => (
     <div className="p-6 md:p-8 animate-slideIn">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Order Review</h2>
-      
+
       {/* Order Summary using CartItem components */}
       <div className="bg-gray-50 rounded-xl p-6 mb-6">
         <h3 className="text-lg font-semibold text-gray-800 mb-4">Order Items</h3>
-        
+
         <div className="space-y-4">
           {cartItems.map((item) => (
             <CartItem
               key={item.id}
               item={item}
-              onUpdateQuantity={handleQuantityChange}
-              onRemove={removeItem}
-              showControls={true}
+              onQuantityChange={(newQty) => handleQuantityChange(item.id, newQty)}
+              onRemove={() => removeItem(item.id)}
+              onSaveForLater={() => { }} // Not needed on checkout
+              isLoading={isSubmitting}
             />
           ))}
         </div>
@@ -734,13 +728,44 @@ const CheckoutPage = () => {
 
   const getSubmitButtonClasses = () => {
     const baseClasses = 'w-full px-6 py-3 rounded-xl font-medium active:scale-95 transition-all duration-200 shadow-lg flex items-center justify-center';
-    
+
     if (isSubmitting) {
       return `${baseClasses} bg-gradient-to-r from-gray-400 to-gray-500 cursor-not-allowed`;
     }
-    
+
     return `${baseClasses} bg-gradient-to-r from-green-600 to-emerald-700 text-white hover:from-green-700 hover:to-emerald-800 hover:shadow-xl`;
   };
+
+  if (isSuccess) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white rounded-[3rem] shadow-2xl p-12 text-center animate-slideIn">
+          <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg shadow-green-100">
+            <CheckCircle size={48} />
+          </div>
+          <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Success!</h1>
+          <p className="text-gray-500 mb-8 leading-relaxed">
+            Your order has been placed successfully. We've sent a confirmation email to
+            <span className="font-bold text-gray-900 block mt-1">{formData.email}</span>
+          </p>
+          <div className="space-y-4">
+            <Link
+              to="/dashboard/orders"
+              className="block w-full py-4 bg-blue-600 text-white rounded-2xl font-black hover:bg-blue-700 transition-all shadow-xl shadow-blue-100"
+            >
+              Track Order
+            </Link>
+            <Link
+              to="/"
+              className="block w-full py-4 text-gray-600 font-bold hover:bg-gray-50 rounded-2xl transition-all"
+            >
+              Back to Shopping
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 md:py-12">

@@ -35,55 +35,26 @@ import PrivacyPage from '../pages/PrivacyPage';
 import TermsPage from '../pages/TermsPage';
 import SellerRegisterPage from '../pages/SellerRegisterPage';
 import CheckoutPage from '../pages/CheckoutPage';
+import VerifyEmailPage from '../pages/VerifyEmailPage';
+import GoogleLoginPage from '../pages/GoogleLoginPage';
+import AnalyticsPage from '../pages/AnalyticsPage';
+import ReportsPage from '../pages/ReportsPage';
+import SellerStorePage from '../pages/SellerStorePage';
+import DealsPage from '../pages/DealsPage';
 
 // Import Seller COMPONENTS (not pages)
 import SellerProducts from '../components/seller/SellerProducts';
 import SellerOrders from '../components/seller/SellerOrders';
 import SellerAnalytics from '../components/seller/SellerAnalytics';
 import SellerProfile from '../components/seller/SellerProfile';
-
-// Create simple placeholder pages for any missing routes
-const ShippingInfoPage = () => (
-  <div className="container mx-auto px-4 py-8">
-    <h1 className="text-3xl font-bold mb-4">Shipping Information</h1>
-    <p>Shipping details page</p>
-  </div>
-);
-
-const ReturnsPage = () => (
-  <div className="container mx-auto px-4 py-8">
-    <h1 className="text-3xl font-bold mb-4">Returns & Refunds</h1>
-    <p>Returns policy page</p>
-  </div>
-);
-
-const SecurityPage = () => (
-  <div className="container mx-auto px-4 py-8">
-    <h1 className="text-3xl font-bold mb-4">Security</h1>
-    <p>Security information page</p>
-  </div>
-);
-
-const SitemapPage = () => (
-  <div className="container mx-auto px-4 py-8">
-    <h1 className="text-3xl font-bold mb-4">Sitemap</h1>
-    <p>Sitemap page</p>
-  </div>
-);
-
-const AccessibilityPage = () => (
-  <div className="container mx-auto px-4 py-8">
-    <h1 className="text-3xl font-bold mb-4">Accessibility</h1>
-    <p>Accessibility statement</p>
-  </div>
-);
-
-const CookiesPage = () => (
-  <div className="container mx-auto px-4 py-8">
-    <h1 className="text-3xl font-bold mb-4">Cookie Policy</h1>
-    <p>Cookie policy page</p>
-  </div>
-);
+import SellerCategories from '../components/seller/SellerCategories';
+import SellerSettings from '../components/seller/SellerSettings';
+import ShippingInfoPage from '../pages/ShippingInfoPage';
+import ReturnsPage from '../pages/ReturnsPage';
+import SecurityPage from '../pages/SecurityPage';
+import SitemapPage from '../pages/SitemapPage';
+import AccessibilityPage from '../pages/AccessibilityPage';
+import CookiesPage from '../pages/CookiesPage';
 
 const AppRoutes = () => {
   const { loading } = useAuth();
@@ -106,13 +77,17 @@ const AppRoutes = () => {
         <Route path="/product/:id" element={<ProductDetailPage />} />
         <Route path="/categories" element={<CategoriesPage />} />
         <Route path="/category/:categoryId" element={<CategoryPage />} />
+        <Route path="/store/:sellerId" element={<SellerStorePage />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/deals" element={<DealsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        
+        <Route path="/auth/google" element={<GoogleLoginPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
+
         {/* SELLER REGISTER MUST COME BEFORE SELLER WILDCARD */}
         <Route path="/seller/register" element={<SellerRegisterPage />} />
-        
+
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
         <Route path="/help" element={<HelpPage />} />
@@ -125,32 +100,32 @@ const AppRoutes = () => {
         <Route path="/sitemap" element={<SitemapPage />} />
         <Route path="/accessibility" element={<AccessibilityPage />} />
         <Route path="/cookies" element={<CookiesPage />} />
-        
+
         {/* Protected Routes - Still inside MainLayout */}
         <Route path="/cart" element={
           <ProtectedRoute>
             <CartPage />
           </ProtectedRoute>
         } />
-        
+
         <Route path="/profile" element={
           <ProtectedRoute>
             <ProfilePage />
           </ProtectedRoute>
         } />
-        
+
         <Route path="/orders" element={
           <ProtectedRoute>
             <OrdersPage />
           </ProtectedRoute>
         } />
-        
+
         <Route path="/settings" element={
           <ProtectedRoute>
             <SettingsPage />
           </ProtectedRoute>
         } />
-        
+
         <Route path="/wishlist" element={
           <ProtectedRoute>
             <WishlistPage />
@@ -162,23 +137,32 @@ const AppRoutes = () => {
             <CheckoutPage />
           </ProtectedRoute>
         } />
-        
+
         {/* 404 inside MainLayout */}
         <Route path="*" element={<NotFoundPage />} />
       </Route>
 
       {/* DASHBOARD - Uses different layout (no MainLayout) */}
-      <Route path="/dashboard" element={
+      <Route path="/dashboard/*" element={
         <ProtectedRoute>
           <DashboardLayout>
-            <DashboardPage />
+            <Routes>
+              <Route path="/" element={<DashboardPage />} />
+              <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/wishlist" element={<WishlistPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/analytics" element={<AnalyticsPage />} />
+              <Route path="/reports" element={<ReportsPage />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
           </DashboardLayout>
         </ProtectedRoute>
       } />
 
       {/* ADMIN - Uses different layout */}
       <Route path="/admin/*" element={
-        <ProtectedRoute requireAdmin>
+        <ProtectedRoute requiredRole="admin">
           <AdminLayout>
             <Routes>
               <Route path="/" element={<AdminPage />} />
@@ -196,16 +180,18 @@ const AppRoutes = () => {
       {/* SELLER DASHBOARD - Uses different layout 
           NOTE: This comes AFTER /seller/register */}
       <Route path="/seller/*" element={
-        <ProtectedRoute requireSeller>
+        <ProtectedRoute requiredRole="seller">
           <SellerLayout>
             <Routes>
               <Route path="/" element={<SellerDashboardPage />} />
               <Route path="/dashboard" element={<SellerDashboardPage />} />
               <Route path="/products" element={<SellerProducts />} />
               <Route path="/orders" element={<SellerOrders />} />
+              <Route path="/categories" element={<SellerCategories />} />
               <Route path="/analytics" element={<SellerAnalytics />} />
               <Route path="/profile" element={<SellerProfile />} />
               <Route path="*" element={<Navigate to="/seller" replace />} />
+              <Route path="/settings" element={<SellerSettings />} />
             </Routes>
           </SellerLayout>
         </ProtectedRoute>
