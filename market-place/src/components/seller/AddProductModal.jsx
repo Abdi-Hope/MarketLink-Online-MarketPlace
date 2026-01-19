@@ -38,6 +38,27 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
+    const [uploading, setUploading] = useState(false);
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const data = new FormData();
+        data.append('image', file);
+
+        setUploading(true);
+        try {
+            const response = await productService.uploadImage(data);
+            setFormData(prev => ({ ...prev, image_url: response.image }));
+        } catch (err) {
+            setError('Failed to upload image');
+            console.error(err);
+        } finally {
+            setUploading(false);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -75,7 +96,7 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
     return (
         <>
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300">
                     {/* Modal Header */}
                     <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50">
                         <h2 className="text-xl font-bold text-gray-800">Add New Product</h2>
@@ -94,7 +115,7 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
                             <p className="text-gray-600">Your product has been successfully listed in the marketplace.</p>
                         </div>
                     ) : (
-                        <form onSubmit={handleSubmit} className="p-6">
+                        <form onSubmit={handleSubmit} className="p-6 flex-1 overflow-y-auto">
                             {error && (
                                 <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center text-red-700">
                                     <AlertCircle size={20} className="mr-3 flex-shrink-0" />
@@ -171,20 +192,51 @@ const AddProductModal = ({ isOpen, onClose, onProductAdded }) => {
                                     </select>
                                 </div>
 
-                                {/* Image URL */}
+                                {/* Image Upload */}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
-                                    <div className="relative">
-                                        <input
-                                            type="text"
-                                            name="image_url"
-                                            value={formData.image_url}
-                                            onChange={handleChange}
-                                            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
-                                            placeholder="https://images.unsplash.com/..."
-                                        />
-                                        <Upload size={18} className="absolute left-3 top-3.5 text-gray-400" />
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Product Image</label>
+                                    <div className="flex items-center gap-4">
+                                        <div className="relative flex-1">
+                                            <input
+                                                type="text"
+                                                name="image_url"
+                                                value={formData.image_url}
+                                                onChange={handleChange}
+                                                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+                                                placeholder="Image URL or upload file..."
+                                            />
+                                            <Upload size={18} className="absolute left-3 top-3.5 text-gray-400" />
+                                        </div>
+                                        <div className="relative">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleImageUpload}
+                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                                disabled={uploading}
+                                            />
+                                            <button
+                                                type="button"
+                                                className={`px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors flex items-center gap-2 ${uploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                            >
+                                                {uploading ? (
+                                                    <div className="animate-spin h-5 w-5 border-2 border-gray-600 border-t-transparent rounded-full" />
+                                                ) : (
+                                                    <Upload size={18} />
+                                                )}
+                                                Upload
+                                            </button>
+                                        </div>
                                     </div>
+                                    {formData.image_url && (
+                                        <div className="mt-2 relative w-full h-32 rounded-lg overflow-hidden border border-gray-200">
+                                            <img
+                                                src={formData.image_url.startsWith('http') ? formData.image_url : `http://localhost:5000${formData.image_url}`}
+                                                alt="Preview"
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Description */}
