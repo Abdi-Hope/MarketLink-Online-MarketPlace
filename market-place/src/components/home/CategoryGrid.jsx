@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, ArrowRight, Sparkles, TrendingUp, Zap } from 'lucide-react';
@@ -12,7 +12,8 @@ const CategoryGrid = ({ categories = [] }) => {
     {
       id: 1,
       name: 'Electronics',
-      icon: '📱',
+      image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       count: 245,
       gradient: 'from-blue-500 via-cyan-500 to-teal-500',
       bgGradient: 'from-blue-50 to-cyan-50',
@@ -23,7 +24,8 @@ const CategoryGrid = ({ categories = [] }) => {
     {
       id: 2,
       name: 'Fashion',
-      icon: '👕',
+      image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: 'https://images.unsplash.com/photo-1445205170230-053b83016050?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       count: 189,
       gradient: 'from-pink-500 via-rose-500 to-red-500',
       bgGradient: 'from-pink-50 to-rose-50',
@@ -33,8 +35,9 @@ const CategoryGrid = ({ categories = [] }) => {
     },
     {
       id: 3,
-      name: 'Home & Garden',
-      icon: '🏠',
+      name: 'Home & Living',
+      image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       count: 156,
       gradient: 'from-green-500 via-emerald-500 to-teal-500',
       bgGradient: 'from-green-50 to-emerald-50',
@@ -43,8 +46,9 @@ const CategoryGrid = ({ categories = [] }) => {
     },
     {
       id: 4,
-      name: 'Beauty',
-      icon: '💄',
+      name: 'Beauty & Wellness',
+      image: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       count: 134,
       gradient: 'from-purple-500 via-fuchsia-500 to-pink-500',
       bgGradient: 'from-purple-50 to-fuchsia-50',
@@ -53,8 +57,9 @@ const CategoryGrid = ({ categories = [] }) => {
     },
     {
       id: 5,
-      name: 'Sports',
-      icon: '⚽',
+      name: 'Sports & Fitness',
+      image: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       count: 98,
       gradient: 'from-orange-500 via-amber-500 to-yellow-500',
       bgGradient: 'from-orange-50 to-amber-50',
@@ -63,8 +68,9 @@ const CategoryGrid = ({ categories = [] }) => {
     },
     {
       id: 6,
-      name: 'Books',
-      icon: '📚',
+      name: 'Books & Stationery',
+      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       count: 76,
       gradient: 'from-yellow-500 via-lime-500 to-green-500',
       bgGradient: 'from-yellow-50 to-lime-50',
@@ -73,24 +79,71 @@ const CategoryGrid = ({ categories = [] }) => {
     },
     {
       id: 7,
-      name: 'Toys',
-      icon: '🧸',
+      name: 'Home Appliances',
+      image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       count: 65,
       gradient: 'from-red-500 via-pink-500 to-purple-500',
       bgGradient: 'from-red-50 to-pink-50',
-      link: '/category/toys',
-      subcategories: ['Lego', 'Action Figures', 'Board Games', 'Plush']
+      link: '/category/home-appliances',
+      subcategories: ['Kitchen', 'Cleaning', 'Cooling', 'Laundry']
     },
     {
       id: 8,
-      name: 'Automotive',
-      icon: '🚗',
+      name: 'Jewelry & Watches',
+      image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
       count: 54,
       gradient: 'from-indigo-500 via-blue-500 to-cyan-500',
       bgGradient: 'from-indigo-50 to-blue-50',
-      link: '/category/automotive',
-      subcategories: ['Parts', 'Accessories', 'Car Care', 'Tools']
+      link: '/category/jewelry',
+      subcategories: ['Rings', 'Necklaces', 'Watches', 'Earrings']
     },
+    {
+      id: 9,
+      name: 'Furniture',
+      image: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      count: 89,
+      gradient: 'from-amber-500 via-orange-500 to-red-500',
+      bgGradient: 'from-amber-50 to-orange-50',
+      link: '/category/furniture',
+      subcategories: ['Living Room', 'Bedroom', 'Office', 'Outdoor']
+    },
+    {
+      id: 10,
+      name: 'Smartphones',
+      image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      count: 167,
+      gradient: 'from-violet-500 via-purple-500 to-fuchsia-500',
+      bgGradient: 'from-violet-50 to-purple-50',
+      link: '/category/smartphones',
+      subcategories: ['Apple', 'Samsung', 'Google', 'Xiaomi'],
+      trending: true
+    },
+    {
+      id: 11,
+      name: 'Gaming',
+      image: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: 'https://images.unsplash.com/photo-1552820728-8b83bb6b773f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      count: 112,
+      gradient: 'from-cyan-500 via-sky-500 to-blue-500',
+      bgGradient: 'from-cyan-50 to-sky-50',
+      link: '/category/gaming',
+      subcategories: ['Consoles', 'Games', 'Accessories', 'PC Gaming']
+    },
+    {
+      id: 12,
+      name: 'Audio & Headphones',
+      image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      icon: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+      count: 93,
+      gradient: 'from-slate-500 via-gray-500 to-zinc-500',
+      bgGradient: 'from-slate-50 to-gray-50',
+      link: '/category/audio',
+      subcategories: ['Headphones', 'Speakers', 'Earbuds', 'Soundbars']
+    }
   ];
 
   const displayCategories = categories.length > 0 ? categories : defaultCategories;
@@ -121,13 +174,13 @@ const CategoryGrid = ({ categories = [] }) => {
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-white text-sm font-bold mb-6 shadow-lg animate-bounce-slow">
             <Sparkles size={16} className="animate-spin-slow" />
-            Trending Categories
+            Shop by Category
           </div>
           <h2 className="text-5xl md:text-6xl font-black mb-6 bg-gradient-to-r from-gray-900 via-blue-800 to-purple-900 bg-clip-text text-transparent leading-tight">
-            Shop by Category
+            Discover Our Collections
           </h2>
           <p className="max-w-2xl mx-auto text-xl text-gray-600 font-medium">
-            Explore our curated collections across major categories
+            Explore premium products across major categories
           </p>
         </div>
 
@@ -147,18 +200,18 @@ const CategoryGrid = ({ categories = [] }) => {
               {category.trending && (
                 <div className="absolute -top-3 -right-3 z-20 flex items-center gap-1 bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg animate-pulse">
                   <TrendingUp size={14} />
-                  Hot
+                  Trending
                 </div>
               )}
 
               {/* Glow Effect on Hover */}
               <div
-                className={`absolute inset-0 bg-gradient-to-r ${category.gradient} rounded-[2rem] opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500`}
+                className={`absolute inset-0 bg-gradient-to-r ${category.gradient} rounded-xl opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500`}
               />
 
               {/* Main Card */}
               <div
-                className={`relative bg-white rounded-[2rem] border-2 transition-all duration-500 overflow-hidden cursor-pointer ${activeCategory === category.id
+                className={`relative bg-white rounded-xl border-2 transition-all duration-500 overflow-hidden cursor-pointer h-full ${activeCategory === category.id
                     ? 'border-transparent shadow-2xl scale-105 -translate-y-2'
                     : hoveredCard === category.id
                       ? 'border-transparent shadow-xl scale-102 -translate-y-1'
@@ -170,91 +223,96 @@ const CategoryGrid = ({ categories = [] }) => {
                 <div className={`absolute inset-0 bg-gradient-to-br ${category.bgGradient} opacity-50 group-hover:opacity-70 transition-opacity duration-500`} />
 
                 {/* Content */}
-                <div className="relative p-8">
-                  {/* Icon Container with Animation */}
-                  <div className="relative mb-6">
-                    <div className={`w-24 h-24 rounded-[1.5rem] bg-gradient-to-br ${category.gradient} flex items-center justify-center shadow-2xl transform transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 ${activeCategory === category.id ? 'scale-110 rotate-12' : ''
-                      }`}>
-                      <span className="text-5xl filter drop-shadow-lg transform group-hover:scale-110 transition-transform duration-300">
-                        {category.icon}
-                      </span>
-                    </div>
-
-                    {/* Floating Sparkle */}
-                    {hoveredCard === category.id && (
-                      <div className="absolute -top-2 -right-2 animate-ping">
-                        <Sparkles className={`text-yellow-400`} size={20} />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Title and Count */}
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-2xl font-black text-gray-900 mb-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:bg-clip-text group-hover:from-blue-600 group-hover:to-purple-600 transition-all duration-300">
+                <div className="relative">
+                  {/* Large Image Container - Maximized */}
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={category.image}
+                      alt={category.name}
+                      className="w-full h-full object-cover transform transition-all duration-500 group-hover:scale-110"
+                    />
+                    {/* Gradient Overlay */}
+                    <div className={`absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-transparent`} />
+                    
+                    {/* Category Name on Image */}
+                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                      <h3 className="text-2xl font-black text-white mb-1">
                         {category.name}
                       </h3>
                       <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${category.gradient} animate-pulse`} />
-                        <p className="text-gray-600 font-bold text-sm">
+                        <p className="text-white/90 font-bold text-sm">
                           {category.count} Products
                         </p>
                       </div>
                     </div>
+                  </div>
 
-                    {/* Chevron with Animation */}
-                    <div className={`p-3 rounded-full transition-all duration-500 ${activeCategory === category.id
-                        ? `rotate-90 bg-gradient-to-r ${category.gradient} text-white shadow-lg`
-                        : 'bg-gray-100 text-gray-400 group-hover:bg-gradient-to-r group-hover:from-blue-100 group-hover:to-purple-100 group-hover:text-blue-600'
-                      }`}>
-                      <ChevronRight size={20} className="transform group-hover:translate-x-1 transition-transform" />
+                  {/* Card Body */}
+                  <div className="p-6">
+                    {/* Animated Divider */}
+                    <div className={`h-1 rounded-full bg-gradient-to-r ${category.gradient} transform origin-left transition-all duration-500 ${hoveredCard === category.id || activeCategory === category.id ? 'scale-x-100' : 'scale-x-0'
+                      }`} />
+
+                    {/* Info Section */}
+                    <div className="flex justify-between items-center mt-4">
+                      {/* Chevron with Animation */}
+                      <div className={`p-3 rounded-lg transition-all duration-500 ${activeCategory === category.id
+                          ? `rotate-90 bg-gradient-to-r ${category.gradient} text-white shadow-lg`
+                          : 'bg-gray-100 text-gray-400 group-hover:bg-gradient-to-r group-hover:from-blue-100 group-hover:to-purple-100 group-hover:text-blue-600'
+                        }`}>
+                        <ChevronRight size={20} className="transform group-hover:translate-x-1 transition-transform" />
+                      </div>
+
+                      {/* Floating Sparkle */}
+                      {hoveredCard === category.id && (
+                        <div className="absolute top-4 right-4 animate-ping">
+                          <Sparkles className={`text-yellow-400`} size={20} />
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Animated Divider */}
-                  <div className={`h-1 rounded-full bg-gradient-to-r ${category.gradient} transform origin-left transition-all duration-500 ${hoveredCard === category.id || activeCategory === category.id ? 'scale-x-100' : 'scale-x-0'
-                    }`} />
-                </div>
+                  {/* Collapsible Subcategories */}
+                  <div
+                    className={`transition-all duration-700 ease-in-out backdrop-blur-sm ${activeCategory === category.id
+                        ? 'max-h-[400px] opacity-100 p-6 pt-0'
+                        : 'max-h-0 opacity-0 overflow-hidden'
+                      }`}
+                  >
+                    <div className="space-y-4">
+                      <p className="text-xs font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                        <Zap size={12} className="text-yellow-500" />
+                        Popular in {category.name}
+                      </p>
 
-                {/* Collapsible Subcategories with Enhanced Design */}
-                <div
-                  className={`transition-all duration-700 ease-in-out backdrop-blur-sm ${activeCategory === category.id
-                      ? 'max-h-[400px] opacity-100 p-6 pt-0'
-                      : 'max-h-0 opacity-0 overflow-hidden'
-                    }`}
-                >
-                  <div className="space-y-4">
-                    <p className="text-xs font-black text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                      <Zap size={12} className="text-yellow-500" />
-                      Popular in {category.name}
-                    </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        {(category.subcategories || ['New Arrivals', 'Best Sellers', 'Discounted', 'Verified']).map((sub, i) => (
+                          <Link
+                            key={i}
+                            to={`${category.link}?sub=${sub.toLowerCase()}`}
+                            className="group/item flex items-center gap-2 px-3 py-2 rounded-lg bg-white bg-opacity-60 hover:bg-opacity-100 text-sm font-bold text-gray-700 hover:text-blue-600 transition-all duration-300 hover:shadow-md hover:scale-105"
+                          >
+                            <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${category.gradient} group-hover/item:scale-150 transition-transform`} />
+                            <span className="truncate">{sub}</span>
+                          </Link>
+                        ))}
+                      </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      {(category.subcategories || ['New Arrivals', 'Best Sellers', 'Discounted', 'Verified']).map((sub, i) => (
-                        <Link
-                          key={i}
-                          to={`${category.link}?sub=${sub.toLowerCase()}`}
-                          className="group/item flex items-center gap-2 px-3 py-2 rounded-lg bg-white bg-opacity-60 hover:bg-opacity-100 text-sm font-bold text-gray-700 hover:text-blue-600 transition-all duration-300 hover:shadow-md hover:scale-105"
-                        >
-                          <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${category.gradient} group-hover/item:scale-150 transition-transform`} />
-                          <span className="truncate">{sub}</span>
-                        </Link>
-                      ))}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          goToCategory(category.link);
+                        }}
+                        className={`w-full mt-4 py-4 bg-gradient-to-r ${category.gradient} text-white rounded-lg font-black text-sm flex items-center justify-center gap-2 hover:shadow-2xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden group/btn`}
+                      >
+                        <span className="relative z-10">Shop {category.name}</span>
+                        <ArrowRight size={18} className="relative z-10 group-hover/btn:translate-x-1 transition-transform" />
+
+                        {/* Shine Effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover/btn:opacity-30 group-hover/btn:animate-shine" />
+                      </button>
                     </div>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        goToCategory(category.link);
-                      }}
-                      className={`w-full mt-4 py-4 bg-gradient-to-r ${category.gradient} text-white rounded-xl font-black text-sm flex items-center justify-center gap-2 hover:shadow-2xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden group/btn`}
-                    >
-                      <span className="relative z-10">Explore {category.name}</span>
-                      <ArrowRight size={18} className="relative z-10 group-hover/btn:translate-x-1 transition-transform" />
-
-                      {/* Shine Effect */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover/btn:opacity-30 group-hover/btn:animate-shine" />
-                    </button>
                   </div>
                 </div>
               </div>
@@ -266,9 +324,9 @@ const CategoryGrid = ({ categories = [] }) => {
         <div className="text-center mt-16">
           <Link
             to="/categories"
-            className="group inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl text-white font-black text-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden"
+            className="group inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-xl text-white font-black text-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 relative overflow-hidden"
           >
-            <span className="relative z-10">Explore All Categories</span>
+            <span className="relative z-10">View All Categories</span>
             <ArrowRight className="relative z-10 group-hover:translate-x-2 transition-transform" size={24} />
 
             {/* Animated Background */}
@@ -369,6 +427,7 @@ CategoryGrid.propTypes = {
     PropTypes.shape({
       id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
       name: PropTypes.string.isRequired,
+      image: PropTypes.string,
       icon: PropTypes.string,
       count: PropTypes.number,
       gradient: PropTypes.string,
