@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
 import { useAuth } from '../context/useAuth';
@@ -12,41 +12,52 @@ const FacebookLoginPage = () => {
     const queryParams = new URLSearchParams(location.search);
     const role = queryParams.get('role') || 'buyer';
 
+    const [loading, setLoading] = useState(false);
+
     const handleFacebookResponse = async (response) => {
-        if (response.accessToken) {
-            const loadingToast = toast.loading('Authenticating with Facebook...');
+        if (!response) {
+            toast.error('No response from Facebook');
+            return;
+        }
 
-            try {
-                const result = await facebookLogin({
-                    email: response.email,
-                    name: response.name,
-                    facebookId: response.userID,
-                    avatar: response.picture?.data?.url || '',
-                    role: role
-                });
-
-                toast.dismiss(loadingToast);
-
-                if (result.success) {
-                    toast.success(`Welcome, ${result.name}!`);
-
-                    if (result.role === 'seller') {
-                        navigate('/seller');
-                    } else if (result.role === 'admin') {
-                        navigate('/admin');
-                    } else {
-                        navigate('/dashboard');
-                    }
-                } else {
-                    toast.error(result.message || 'Facebook authentication failed');
-                }
-            } catch (error) {
-                toast.dismiss(loadingToast);
-                toast.error('Authentication failed');
-                console.error('Facebook login error:', error);
-            }
-        } else {
+        if (!response.accessToken) {
             toast.error('Facebook authentication was cancelled');
+            return;
+        }
+
+        if (!response.email) {
+            toast.error('Facebook did not return an email. Please register manually.');
+            return;
+        }
+
+        setLoading(true);
+        const loadingToast = toast.loading('Authenticating with Facebook...');
+
+        try {
+            const result = await facebookLogin({
+                email: response.email,
+                name: response.name,
+                facebookId: response.userID,
+                avatar: response.picture?.data?.url || '',
+                role: role
+            });
+
+            toast.dismiss(loadingToast);
+
+            if (result && result.success) {
+                toast.success(`Welcome, ${result.name || 'user'}!`);
+
+                const destination = location.state?.from || (result.role === 'seller' ? '/seller' : result.role === 'admin' ? '/admin' : '/dashboard');
+                navigate(destination);
+            } else {
+                toast.error(result?.message || 'Facebook authentication failed');
+            }
+        } catch (error) {
+            toast.dismiss(loadingToast);
+            toast.error(error?.message || 'Authentication failed');
+            console.error('Facebook login error:', error?.message || error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -67,23 +78,40 @@ const FacebookLoginPage = () => {
 
                 {/* OAuth Button */}
                 <div className="p-8">
-                    <FacebookLogin
-                        appId={import.meta.env.VITE_FACEBOOK_APP_ID}
-                        autoLoad={false}
-                        fields="name,email,picture"
-                        callback={handleFacebookResponse}
-                        render={renderProps => (
-                            <button
-                                onClick={renderProps.onClick}
-                                className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all flex items-center justify-center space-x-2"
-                            >
-                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                                </svg>
-                                <span>Continue with Facebook</span>
-                            </button>
+                        {import.meta.env.VITE_FACEBOOK_APP_ID ? (
+                            <FacebookLogin
+                                appId={import.meta.env.VITE_FACEBOOK_APP_ID}
+                                autoLoad={false}
+                                fields="name,email,picture"
+                                callback={handleFacebookResponse}
+                                render={renderProps => (
+                                    <button
+                                        onClick={renderProps.onClick}
+                                        disabled={loading}
+                                        aria-busy={loading}
+                                        aria-label="Continue with Facebook"
+                                        className={`w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all flex items-center justify-center space-x-2 ${loading ? 'opacity-75 cursor-not-allowed' : ''}`}
+                                    >
+                                        {loading ? (
+                                            <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none">
+                                                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
+                                                <path d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="4" className="opacity-75" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                            </svg>
+                                        )}
+
+                                        <span>{loading ? 'Processing...' : 'Continue with Facebook'}</span>
+                                    </button>
+                                )}
+                            />
+                        ) : (
+                            <div className="p-4 bg-yellow-50 text-yellow-800 rounded text-sm">
+                                Facebook login is not configured. Please set <strong>VITE_FACEBOOK_APP_ID</strong>.
+                            </div>
                         )}
-                    />
 
                     <div className="mt-6 text-sm text-gray-600 text-center">
                         Facebook will share your name, email address, and profile picture with MarketLink.
