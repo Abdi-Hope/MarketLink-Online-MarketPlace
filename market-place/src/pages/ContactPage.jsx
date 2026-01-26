@@ -108,10 +108,13 @@ const ContactPage = () => {
               <form onSubmit={handleSubmit} className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-2">
-                    <label className="text-sm font-black text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
+                    <label htmlFor="contact-name" className="text-sm font-black text-gray-400 uppercase tracking-widest ml-1">Full Name</label>
                     <input
+                      id="contact-name"
+                      name="name"
                       type="text"
                       required
+                      aria-required={true}
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="John Doe"
@@ -119,10 +122,13 @@ const ContactPage = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-black text-gray-400 uppercase tracking-widest ml-1">Email Address</label>
+                    <label htmlFor="contact-email" className="text-sm font-black text-gray-400 uppercase tracking-widest ml-1">Email Address</label>
                     <input
+                      id="contact-email"
+                      name="email"
                       type="email"
                       required
+                      aria-required={true}
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="john@example.com"
@@ -132,8 +138,10 @@ const ContactPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-black text-gray-400 uppercase tracking-widest ml-1">Subject</label>
+                  <label htmlFor="contact-subject" className="text-sm font-black text-gray-400 uppercase tracking-widest ml-1">Subject</label>
                   <select
+                    id="contact-subject"
+                    name="subject"
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                     className="w-full px-6 py-4 bg-gray-50 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all text-gray-700 font-bold"
@@ -147,9 +155,12 @@ const ContactPage = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-black text-gray-400 uppercase tracking-widest ml-1">Your Message</label>
+                  <label htmlFor="contact-message" className="text-sm font-black text-gray-400 uppercase tracking-widest ml-1">Your Message</label>
                   <textarea
+                    id="contact-message"
+                    name="message"
                     required
+                    aria-required={true}
                     rows="5"
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
